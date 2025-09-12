@@ -1,15 +1,13 @@
-import { useState } from 'react'
-import JobTester from './pages/jobs/JobTester'
+import { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
     <>
       <h1>RTK Query Test</h1>
-      <JobTester />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
