@@ -5,12 +5,15 @@ import App from "./App.jsx";
 import SingleJobCard from "./components/card/jobs/single-job-card.jsx";
 import { Provider } from "react-redux";
 import { store } from "./store.js";
+import About from "./pages/jobs/aboutUs.jsx";
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <App />
-      <SingleJobCard />
+      <SingleJobCard /> 
+      <About/>
     </Provider>
   </StrictMode>
 );
