@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { FaEye, FaEyeSlash, FaFacebook, FaLinkedin } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
-import LoginImage from '../../images/login.png';
+import VerifyImage from '../../images/verify.png';
 import JOBCollapLogo from '../../images/jobCollapLogo.png';
 
-export default function Login() {
+export default function ForgotPassword() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -23,7 +21,7 @@ export default function Login() {
   </div>
   <div className="text-center w-full max-w-sm relative mt-14">
     <img
-      src={LoginImage}
+      src={VerifyImage}
       alt="Sign up illustration"
       className="max-w-lg h-auto mt-14"
     />
@@ -33,7 +31,7 @@ export default function Login() {
 
     {/* Right Side Login Form */}
 <div className="w-1/2 flex flex-col justify-center p-10 bg-[#ECF2FF]">
-  <h2 className="text-3xl text-center font-bold text-[#1A5276] mb-6">Login</h2>
+  <h2 className="text-3xl text-center font-bold text-[#1A5276] mb-6">Enter your email to change password</h2>
   <form className="space-y-4 flex flex-col items-center">
     {/* Email */}
     <div className="w-11/12">
@@ -44,53 +42,17 @@ export default function Login() {
         className="w-11/11 p-2 border border-[#1A5276] rounded-lg mt-1 bg-[#FFFFFF]"
       />
     </div>
-
-    {/* Password */}
-    <div className="relative w-11/12">
-      <label className="block text-md font-bold text-[#1A5276]">Password</label>
-      <input
-        type={showPassword ? "text" : "password"}
-        placeholder="Password"
-        className="w-11/11 p-2 border border-[#1A5276] rounded-lg mt-1 bg-[#FFFFFF]"
-      />
-      <button
-        type="button"
-        className="absolute top-10 right-3 text-gray-600"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        {showPassword ? <FaEye size={18}/> : <FaEyeSlash size={18}/>}
-      </button>
-      <div className="text-right mt-1 ">
-        <a href="#" className="text-sm text-[#1A5276] hover:underline">Forget password?</a>
-      </div>
-    </div>
-
     {/* Login button */}
      <button
             type="submit"
             className="w-40 bg-[#154360] text-white py-2 rounded-full   mt-6 hover:bg-[#1A5276] transition"
             >
-            Login
+            Verify
            </button>
   </form>
 
-  {/* Social login */}
-  <div className="mt-6 text-center">
-    <p className="text-lg mb-3 text-[#1A5276]">Login with</p>
-    <div className="flex justify-center space-x-5 text-3xl">
-      <a href="#" className="text-blue-600"><FaFacebook /></a>
-      <a href="#" className="text-blue-700"><FaLinkedin /></a>
-      <a href="#"><FcGoogle /></a>
-    </div>
-  </div>
 
-  {/* Register link */}
-  <p className="mt-4 text-lg text-center">
-    Don't have account?{" "}
-    <a href="#" className="text-[#1A5276] hover:underline">Register</a>
-  </p>
 </div>
-
   </div>
 </div>
 
