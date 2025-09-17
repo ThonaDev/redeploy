@@ -8,12 +8,14 @@ import PhatPhea from "../../images/phatphea.jpg";
 import Mengleang from "../../images/mengleang.jpg";
 import Rothanak from "../../images/rothanak.jpg";
 import Thona from "../../images/thona.jpg";
+import NavBar from "../../components/layouts/navbar-afterLogin.jsx";
 
 export default function About() {
   return (
     <>
       {/* ====== About Section ====== */}
-      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-24">
+      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-16">
+        {/* <NavBar  className="mb-16 "/> */}
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Text */}
           <div>

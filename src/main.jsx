@@ -13,10 +13,10 @@ import Nav from "./components/layouts/navbar-beforeLogin.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <NavBar/>
-      <Nav/>
-      <App />
-      <SingleJobCard /> 
+      {/* <NavBar/> */}
+      {/* <Nav/> */}
+      {/* <App /> */}
+      {/* <SingleJobCard />  */}
       <About/>
     </Provider>
   </StrictMode>
