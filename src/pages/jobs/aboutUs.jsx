@@ -1,22 +1,22 @@
 import React from "react";
 import {AboutCard} from "../../components/card/about_card/Card-About";
-import Sokcheat from "../../images/Sokcheat.jpg";
-import Chansokpheng from "../../images/chansokpheng.jpg";
-import Sunnich from "../../images/sunnich.jpg";
-import Sokkeang from "../../images/sokkeang.jpg";
-import PhatPhea from "../../images/phatphea.jpg";
-import Mengleang from "../../images/mengleang.jpg";
-import Rothanak from "../../images/rothanak.jpg";
-import Thona from "../../images/thona.jpg";
+import Sokcheat from "../../assets/sokcheat.jpg";
+import Chansokpheng from "../../assets/chansokpheng.jpg";
+import Sunnich from "../../assets/sunnich.jpg";
+import Sokkeang from "../../assets/sokkeang.jpg";
+import PhatPhea from "../../assets/phatphea.jpg";
+import Mengleang from "../../assets/mengleang.jpg";
+import Rothanak from "../../assets/rothanak.jpg";
+import Thona from "../../assets/thona.jpg";
 import NavBar from "../../components/layouts/navbar-afterLogin.jsx";
 
 export default function About() {
   return (
     <>
       {/* ====== About Section ====== */}
-      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-16">
-        {/* <NavBar  className="mb-16 "/> */}
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-6">
+        <NavBar  className="mb-16 "/>
+        <div className="max-w-7xl mx-auto py-9 px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Text */}
           <div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 font-poppins text-[#FF7A00]">
@@ -34,7 +34,7 @@ export default function About() {
 
           {/* Right Side: Image */}
           <div className="flex justify-center">
-            <img src="src/images/hero.png" alt="About Jobcollap" />
+            <img src="src/assets/hero.png" alt="About Jobcollap" />
           </div>
         </div>
       </section>
@@ -44,7 +44,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Image */}
           <div className="flex justify-center">
-            <img src="src/images/Team.jpg" alt="Who We Are" />
+            <img src="src/assets/Team.jpg" alt="Who We Are" />
           </div>
 
           {/* Right Side: Text */}
