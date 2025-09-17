@@ -1,6 +1,6 @@
 import { useState } from "react";
-import VerifyImage from '../../images/verify.png';
-import JOBCollapLogo from '../../images/jobCollapLogo.png';
+import VerifyImage from '../../assets/verify.png';
+import JOBCollapLogo from '../../assets/jobCollapLogo.png';
 
 export default function ForgotPassword() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +45,7 @@ export default function ForgotPassword() {
     {/* Login button */}
      <button
             type="submit"
-            className="w-40 bg-[#154360] text-white py-2 rounded-full   mt-6 hover:bg-[#1A5276] transition"
+            className="w-40 bg-[#154360] text-white py-2 rounded-full   mt-6 hover:bg-[#149AC5] transition"
             >
             Verify
            </button>

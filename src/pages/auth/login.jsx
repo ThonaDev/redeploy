@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaFacebook, FaLinkedin } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import LoginImage from '../../images/login.png';
-import JOBCollapLogo from '../../images/jobCollapLogo.png';
+import LoginImage from '../../assets/login.png';
+import JOBCollapLogo from '../../assets/jobCollapLogo.png';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -68,7 +68,7 @@ export default function Login() {
     {/* Login button */}
      <button
             type="submit"
-            className="w-40 bg-[#154360] text-white py-2 rounded-full   mt-6 hover:bg-[#1A5276] transition"
+            className="w-40 bg-[#154360] text-white py-2 rounded-full   mt-6 hover:bg-[#149AC5] transition"
             >
             Login
            </button>
