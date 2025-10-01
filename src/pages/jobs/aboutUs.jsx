@@ -15,7 +15,7 @@ export default function About() {
     <>
       {/* ====== About Section ====== */}
       <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-6">
-        <NavBar  className="mb-16 "/>
+        {/* <NavBar  className="mb-16 "/> */}
         <div className="max-w-7xl mx-auto py-9 px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Text */}
           <div>
