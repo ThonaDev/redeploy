@@ -68,3 +68,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+
+
+/* Remove default password reveal icon in Edge/Chrome */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-clear-button {
+  display: none !important;
+}
