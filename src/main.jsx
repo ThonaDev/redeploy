@@ -6,7 +6,7 @@ import SingleJobCard from "./components/card/jobs/single-job-card.jsx";
 import { Provider } from "react-redux";
 import { store } from "./store.js";
 import Footer from "./components/layouts/footer.jsx";
-// import JobDetail from "./pages/jobs/job-details-page.jsx"
+import JobDetailsPage from "./pages/jobs/job-details-page.jsx"
 
 
 createRoot(document.getElementById("root")).render(
@@ -15,6 +15,7 @@ createRoot(document.getElementById("root")).render(
       {/* <App /> */}
       {/* <SingleJobCard /> */}
       {/* <JobDetail/> */}
+      <JobDetailsPage />
      <Footer/>
     </Provider>
   </StrictMode>
