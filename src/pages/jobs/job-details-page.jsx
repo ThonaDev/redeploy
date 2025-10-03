@@ -11,7 +11,7 @@ export default function App() {
   return (
     <div className="bg-[#EFF7FF] min-h-screen px-16 py-8 flex flex-col items-center font-sans">
       {/* Section 1: Job Header and Tags */}
-      <Card className="w-full max-w-5xl py-6 px-8 rounded-2xl">
+      <Card className="w-full max-w-6xl py-6 px-8 rounded-2xl">
         <div className="flex justify-between items-center mt-2">
           <h1 className="text-xl font-semibold text-[#1A5276] py-1.5 ">Web Developer</h1>
           <button className=" text-[#FF6C1A] p-2 text-center ">
@@ -68,14 +68,14 @@ export default function App() {
       </Card> */}
 
       {/* Section 2: Description */}
-      <Card className="w-full max-w-5xl py-6 px-8 rounded-2xl text-start">
+      <Card className="w-full max-w-6xl py-6 px-8 rounded-2xl text-start">
         <h2 className="text-xl font-semibold text-[#1A5276] mb-1 text-start ">Description</h2>
         <p className="text-[#1A5276] leading-relaxed text-base text-start ">
           A Web Developer is a professional who builds and maintains websites or web applications. They work with programming languages like HTML, CSS, JavaScript, and sometimes technologies to ensure websites are functional, user-friendly, and highly responsive. Their role combines coding, problem-solving, and design to deliver smooth online experiences.
         </p>
       </Card>
       {/* Section 3: Job Requirements and Contact Info */}
-      <Card className="w-full max-w-5xl py-6 px-8 rounded-2xl space-x-1 hover:text-[#FF7A00]">
+      <Card className="w-full max-w-6xl py-6 px-8 rounded-2xl space-x-1 hover:text-[#FF7A00]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 hover:text-[#FF7A00]">
           {/* Job Requirements */}
           <div className="text-start">
