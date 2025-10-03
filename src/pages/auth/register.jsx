@@ -315,7 +315,7 @@
 
 import React from "react"; 
 import { useState } from "react";
-import { FaEye, FaEyeSlash, FaGithub, FaLinkedin } from "react-icons/fa"; // ✅ Changed Facebook to Github
+import { FaEye, FaEyeSlash, FaGithub, FaLinkedin } from "react-icons/fa"; 
 import { FcGoogle } from "react-icons/fc";
 import { useRegisterMutation } from "../../features/auth/authSlide";
 import { ToastContainer, toast } from "react-toastify";
