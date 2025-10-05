@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import { store } from "./store.js";
 import Footer from "./components/layouts/footer.jsx";
 import JobDetailsPage from "./pages/jobs/job-details-page.jsx"
+import Homepage from "./pages/jobs/homepage.jsx";
 
 
 createRoot(document.getElementById("root")).render(
@@ -17,6 +18,7 @@ createRoot(document.getElementById("root")).render(
       {/* <JobDetail/> */}
       <JobDetailsPage />
      <Footer/>
+     <Homepage/>
     </Provider>
   </StrictMode>
 );
