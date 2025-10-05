@@ -1,3 +1,4 @@
+//BenefitsData
 import React from 'react';
 // Using Lucide icons for a clean, modern look, similar to how you used react-icons
 import { Briefcase, MapPin, Users2, Clock } from 'lucide-react'; 
