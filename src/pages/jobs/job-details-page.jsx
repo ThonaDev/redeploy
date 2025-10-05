@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 import React from 'react';
 import { MapPin, Mail, Phone, Clock, Bookmark } from 'lucide-react';
 
