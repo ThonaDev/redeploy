@@ -42,7 +42,7 @@ export default function App() {
           </div>
           <div className="text-start">
             <div className="flex flex-col items-start">
-              <p className="text-[#1A5276] text-sm  py-1.1">Freelancing</p>
+              <p className="text-[#1A5276] text-sm  py-1.1">Freelancing</p>
               <div className="flex items-center text-xs text-[#1A5276] mt-0.5">
                 <MapPin className="w-3 h-3 mr-1 text-[#1A5276] " />
                 <span >Toul Kuok</span>
