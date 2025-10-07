@@ -1,5 +1,5 @@
 import React from "react";
-import {AboutCard} from "../../components/card/about_card/Card-About";
+import { AboutCard } from "../../components/card/about_card/Card-About";
 import Sokcheat from "../../assets/sokcheat.jpg";
 import Chansokpheng from "../../assets/chansokpheng.jpg";
 import Sunnich from "../../assets/sunnich.jpg";
@@ -15,19 +15,19 @@ export default function About() {
     <>
       {/* ====== About Section ====== */}
       <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-6">
-        {/* <NavBar  className="mb-16 "/> */}
-        <div className="max-w-7xl mx-auto py-9 px-6 grid md:grid-cols-2 gap-12 items-center">
+        {/* <NavBar className="mb-16 " /> */}
+        <div className="max-w-7xl mx-auto py-10 px-16 grid md:grid-cols-2 gap-24 items-center">
           {/* Left Side: Text */}
           <div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 font-poppins text-[#FF7A00]">
               About <span className="text-[#1A5276]">Jobcollap</span>
             </h1>
-            <div className="text-lg text-[#1A5276] mb-8 space-y-2">
-              <p>A simple and trusted platform where</p>
-              <p>freelancers and businesses</p>
-              <p>connect and grow</p>
-            </div>
-            <button className="px-6 py-3 bg-[#1A5276] text-white rounded-2xl font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
+            <p className="text-lg text-[#1A5276] mb-8 space-y-2">
+              A simple and trusted platform where 
+              freelancers and businesses
+              connect and grow
+            </p>
+            <button className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
               Learn More
             </button>
           </div>
@@ -58,10 +58,10 @@ export default function About() {
               projects quickly and easily. We focus on connecting freelancers
               with meaningful opportunities that match their expertise,
               location, and goals. With smart search tools, a simple interface,
-              and flexible ways to reach clients, JOBCollap makes the freelancing
-              journey faster, smoother, and more rewarding. Best of all,
-              freelancers have the freedom to work from anywhere, giving them
-              full flexibility to manage their careers on their own terms.
+              and flexible ways to reach clients, JOBCollap makes the
+              freelancing journey faster, smoother, and more rewarding. Best of
+              all, freelancers have the freedom to work from anywhere, giving
+              them full flexibility to manage their careers on their own terms.
             </p>
           </div>
         </div>
@@ -91,8 +91,8 @@ export default function About() {
             <p className="text-lg text-[#1A5276] leading-relaxed">
               Our mission is to connect freelancers and businesses through a
               simple, fair, and reliable platform that encourages collaboration,
-              supports growth, and drives long-term success. We are committed
-              to providing a space where talent and opportunity meet, creating
+              supports growth, and drives long-term success. We are committed to
+              providing a space where talent and opportunity meet, creating
               value for both individuals and organizations.
             </p>
           </div>
@@ -135,7 +135,7 @@ export default function About() {
               imgAlt="Phat Phea"
             />
             <AboutCard
-              name="Leip Sokkeang"
+              name="Liep Sokkeang"
               position="Front End Developer"
               imgSrc={Sokkeang}
               imgAlt="Sokkeang"
@@ -147,7 +147,7 @@ export default function About() {
               imgAlt="Sunnich"
             />
             <AboutCard
-              name="Senghorng Mengleang"
+              name="Senghorn Mengleang"
               position="Front End Developer"
               imgSrc={Mengleang}
               imgAlt="Mengleang"

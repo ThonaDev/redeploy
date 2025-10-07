@@ -1,7 +1,14 @@
-import React from 'react'
+import React from "react";
+import { NavLink } from "react-router-dom";
+import NavBar from "../../components/layouts/navbar-afterLogin";
+import Herosection from "./herosection";
 
-export default function Homepage() {
+const Homepage = () => {
   return (
-    <div>homepage</div>
-  )
-}
+    <>
+      <Herosection/>
+    </>
+  );
+};
+
+export default Homepage;
