@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { FaLocationDot, FaEnvelope, FaPhone, FaClock, FaRegBookmark, FaBookmark } from 'react-icons/fa6';
+import { GrLocation } from "react-icons/gr";
+import { AiOutlineMail } from "react-icons/ai";
+import { BiPhone } from "react-icons/bi";
+import { MdOutlineAccessTime } from "react-icons/md";
 
 export default function JobDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -104,7 +108,8 @@ export default function JobDetail() {
             <div className="flex flex-col items-start">
               <p className="text-[#1A5276] text-sm py-1">{job.workingTime || 'Full-time'}</p>
               <div className="flex items-center text-xs text-[#1A5276] mt-0.5">
-                <FaLocationDot className="w-3 h-3 mr-1 text-[#1A5276]" />
+{/*                 <FaLocationDot className="w-3 h-3 mr-1 text-[#1A5276]" /> */}
+                <GrLocation class="w-3 h-3 mr-1 text-[#1A5276]"/>
                 <span>{job.location}</span>
               </div>
             </div>
@@ -167,43 +172,27 @@ export default function JobDetail() {
               ))}
             </ul>
             
-            <h2 className="text-xl font-semibold text-[#1A5276] mb-4">
-              Key Skills:
-            </h2>
-            <ul className="list-none text-[#1A5276] space-y-3">
-              {/* Still hardcoded for demonstration, ideal for API integration */}
-              {[
-                'Frontend development (HTML, CSS, JS, frameworks).',
-                'Backend development and API integration.',
-                'Database management (SQL/NoSQL).',
-                'UI/UX awareness for better user experience.',
-                'Problem-solving and teamwork skills.',
-              ].map((skill, index) => (
-                <li key={`skill-${index}`} className="flex items-start text-sm">
-                  <span className="text-[#1A5276] mr-2 text-lg leading-none">•</span>
-                  <span>{skill}</span>
-                </li>
-              ))}
-            </ul>
+         
           </div>
           
 
           {/* Column 2: Contact Owner */}
-          <div className="text-start md:mt-0 mt-8">
+          <div className="text-start md:mt-0 mt-8 ">
             <h2 className="text-xl font-semibold text-[#1A5276] mb-3">
               Contact owner
             </h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-[#1A5276] mb-6">
               If you have any questions, please feel free to let us know
             </p>
-            <div className="space-y-4 text-gray-500 text-sm">
+            <div className="space-y-4 text-[#1A5276] text-sm">
               {/* Address */}
               <div className="flex items-start space-x-3">
-                <FaLocationDot className="w-5 h-5 text-[#1A5276] flex-shrink-0" />
+                {/*                 <FaLocationDot className="w-5 h-5 text-[#1A5276] flex-shrink-0" /> */}
+                <GrLocation className="w-5 h-5 text-[#1A5276] flex-shrink-0"/>
                 <address className="not-italic">
                   <a
                     href="#"
-                    className="underline text-gray-500 hover:text-[#FF6C1A] hover:no-underline block"
+                    className="underline text-[#1A5276] hover:text-[#FF6C1A] hover:no-underline block"
                   >
                     <span className="block">{job.location}</span>
                   </a>
@@ -212,10 +201,11 @@ export default function JobDetail() {
 
               {/* Email */}
               <div className="flex items-start space-x-3">
-                <FaEnvelope className="w-5 h-5 text-[#1A5276] flex-shrink-0" />
+{/*                 <FaEnvelope className="w-5 h-5 text-[#1A5276] flex-shrink-0" /> */}
+                <AiOutlineMail  className="w-5 h-5 text-[#1A5276] flex-shrink-0"/>
                 <a
                   href={`mailto:${job.email}`}
-                  className="hover:underline text-gray-500 hover:text-[#FF6C1A]"
+                  className="hover:underline text-[#1A5276] hover:text-[#FF6C1A]"
                 >
                   {job.email}
                 </a>
@@ -223,10 +213,11 @@ export default function JobDetail() {
 
               {/* Phone */}
               <div className="flex items-start space-x-3">
-                <FaPhone className="w-5 h-5 text-[#1A5276] flex-shrink-0" />
+{/*                 <FaPhone className="w-5 h-5 text-[#1A5276] flex-shrink-0" /> */}
+                <BiPhone  className="w-5 h-5 text-[#1A5276] flex-shrink-0"/>
                 <a
                   href={`tel:${job.phoneNumber}`}
-                  className="hover:underline text-gray-500 hover:text-[#FF6C1A]"
+                  className="hover:underline text-[#1A5276] hover:text-[#FF6C1A]"
                 >
                   {job.phoneNumber}
                 </a>
@@ -234,10 +225,11 @@ export default function JobDetail() {
 
               {/* Hours */}
               <div className="flex items-start space-x-3">
-                <FaClock className="w-5 h-5 text-[#1A5276] flex-shrink-0" />
-                <div className="text-gray-500">
+{/*                 <FaClock className="w-5 h-5 text-[#1A5276] flex-shrink-0" /> */}
+                    <MdOutlineAccessTime  className="w-5 h-5 text-[#1A5276] flex-shrink-0"/>
+                <div className="text-[#1A5276]">
                   <span className="block">Monday - Friday</span>
-                  <span className="block text-gray-500">8:00 AM - 5:00 PM</span>
+                  <span className="block text-[#1A5276]">8:00 AM - 5:00 PM</span>
                 </div>
               </div>
             </div>
