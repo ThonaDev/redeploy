@@ -140,7 +140,7 @@ export default function JobDetail() {
           <span className="text-[#1A5276] text-sm font-normal hover:text-[#FF7A00]">
             {formatSalary(job.salary)}
           </span>
-          <button className="bg-[#1A5276] text-white font-medium text-[0.6rem] px-2 py-0.5 mr-1.2 rounded-lg hover:bg-[#149AC5] transition-colors">
+          <button className="bg-[#1A5276] text-white font-medium text-[0.6rem] px-4 py-1.5 mr-1.2 rounded-xl hover:bg-[#149AC5] transition-colors">
             Apply
           </button>
         </div>
