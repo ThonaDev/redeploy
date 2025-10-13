@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { AboutCard } from "../../components/card/about_card/Card-About";
 import Sokcheat from "../../assets/sokcheat.jpg";
 import Chansokpheng from "../../assets/chansokpheng.jpg";
@@ -11,6 +11,14 @@ import Thona from "../../assets/thona.jpg";
 import NavBar from "../../components/layouts/navbar-afterLogin.jsx";
 
 export default function About() {
+  const whoWeAreRef = useRef(null); // Create a reference for "Who We Are" section
+
+  // Function to scroll to "Who We Are" section
+  const scrollToWhoWeAre = () => {
+    if (whoWeAreRef.current) {
+      whoWeAreRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <>
       {/* ====== About Section ====== */}
@@ -27,7 +35,7 @@ export default function About() {
               freelancers and businesses
               connect and grow
             </p>
-            <button className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
+            <button onClick={scrollToWhoWeAre} className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
               Learn More
             </button>
           </div>
@@ -40,7 +48,7 @@ export default function About() {
       </section>
 
       {/* ====== Who We Are Section ====== */}
-      <section className="bg-[#F5F5F5] py-6">
+      <section ref={whoWeAreRef} className="bg-[#F5F5F5] py-6">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Image */}
           <div className="flex justify-center">
