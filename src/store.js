@@ -1,32 +1,21 @@
-// import { configureStore } from "@reduxjs/toolkit";
-// import { apiSlice } from "./features/api/apiSlice";
-// import { setupListeners } from "@reduxjs/toolkit/query";
-
-// export const store = configureStore({
-//   reducer: {
-//     // Add the generated reducer as a specific top-level slice
-//     [apiSlice.reducerPath]: apiSlice.reducer
-//   },
-//   // Adding the api middleware enables caching, invalidation, polling,
-//   // and other useful features of `rtk-query`.
-//   middleware: (getDefaultMiddleware) =>
-//     getDefaultMiddleware().concat(apiSlice.middleware)
-// });
-
-// setupListeners(store.dispatch);
-
-
-
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./features/api/apiSlice";
+import { authSlice } from "./features/auth/authSlide";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { useDispatch, useSelector } from "react-redux";
+// import { TypedUseSelectorHook } from "@reduxjs/toolkit"; // Remove this line in JS files
 
 export const store = configureStore({
   reducer: {
-    [apiSlice.reducerPath]: apiSlice.reducer
+    [apiSlice.reducerPath]: apiSlice.reducer,
+    auth: authSlice.reducer, // Add auth reducer for managing tokens, user, and isAuthenticated
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware)
+    getDefaultMiddleware().concat(apiSlice.middleware), // apiSlice.middleware includes authApi since injected
 });
 
 setupListeners(store.dispatch);
+
+// Hooks for use in components (e.g., useAppDispatch in Login.jsx)
+export const useAppDispatch = () => useDispatch();
+export const useAppSelector = useSelector;

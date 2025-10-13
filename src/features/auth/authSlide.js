@@ -1,47 +1,31 @@
-// // src/features/auth/authSlice.js
-// import { apiSlice } from "../api/apiSlice";
+import { createSlice } from "@reduxjs/toolkit";
 
-// export const authApi = apiSlice.injectEndpoints({
-//   endpoints: (build) => ({
-//     login: build.mutation({
-//       query: (body) => ({
-//         url: "/auth/login",
-//         method: "POST",
-//         body,
-//       }),
-//     }),
-//     register: build.mutation({
-//       query: (body) => ({
-//         url: "/auth/register", // matches your backend
-//         method: "POST",
-//         body,
-//       }),
-//     }),
-//   }),
-// });
-
-// export const { useLoginMutation, useRegisterMutation } = authApi;
-
-
-import { apiSlice } from "../api/apiSlice";
-
-export const authApi = apiSlice.injectEndpoints({
-  endpoints: (build) => ({
-    login: build.mutation({
-      query: (body) => ({
-        url: "/auth/login",
-        method: "POST",
-        body,
-      }),
-    }),
-    register: build.mutation({
-      query: (body) => ({
-        url: "/auth/register",
-        method: "POST",
-        body,
-      }),
-    }),
-  }),
+// Redux Slice for Auth State Management
+export const authSlice = createSlice({
+  name: "auth",
+  initialState: {
+    user: null, // Optional: Store user data after login (e.g., { id, email, name })
+    accessToken: null,
+    refreshToken: null,
+    isAuthenticated: false,
+  },
+  reducers: {
+    setCredentials: (state, action) => {
+      const { accessToken, refreshToken, user } = action.payload;
+      state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
+      state.user = user || null; // If server returns user info, store it
+      state.isAuthenticated = !!accessToken;
+    },
+    clearCredentials: (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+    },
+    // Optional: Add more reducers, e.g., for logout or user updates
+  },
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { setCredentials, clearCredentials } = authSlice.actions;
+//export default authSlice.reducer;
