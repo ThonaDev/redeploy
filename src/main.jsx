@@ -1,36 +1,5 @@
-// import React, { useEffect } from "react";
-// import ReactDOM from "react-dom/client";
-// import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-// import { Provider } from "react-redux"; 
-// import { store } from "./store"; 
-// import "./index.css";
-// import Register from "./pages/auth/register";
-// import Login from "./pages/auth/login";
-// import ForgotPassword from "./pages/auth/forgotpassword";
-// import ResetPassword from "./pages/auth/resetpassword";
-
-
-// const RootApp = () => (
-//   <Provider store={store}>
-//     <BrowserRouter>
-//      {/* <Register /> */}
-//      {/* <Login /> */}
-//      {/* <ForgotPassword/> */}
-//       <ResetPassword/>
-//     </BrowserRouter>
-//   </Provider>
-// );
-
-// ReactDOM.createRoot(document.getElementById("root")).render(<RootApp />);
-
-
-
-
-
-
-
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import "./index.css";
@@ -40,20 +9,24 @@ import Register from "./pages/auth/register";
 import Login from "./pages/auth/login";
 import ForgotPassword from "./pages/auth/forgotpassword";
 import ResetPassword from "./pages/auth/resetpassword"; // ✅ new import
+import RootLayout from "./components/layouts/root-layout";
+import App from "./App";
+import { StrictMode } from "react";
 
-const RootApp = () => (
-  <Provider store={store}>
-    <BrowserRouter>
-      <Routes>
-        {/* ✅ Set Register as default page */}
-        <Route path="/" element={<Register />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-      </Routes>
-    </BrowserRouter>
-  </Provider>
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<RootLayout />}>
+            <Route path="/" element={<App />} />
+          </Route>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Routes>
+      </BrowserRouter>
+    </Provider>
+  </StrictMode>
 );
-
-ReactDOM.createRoot(document.getElementById("root")).render(<RootApp />);

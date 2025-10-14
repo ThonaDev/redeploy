@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { FaEye, FaEyeSlash, FaGithub, FaLinkedin } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import LoginImage from "../../assets/login.png";
