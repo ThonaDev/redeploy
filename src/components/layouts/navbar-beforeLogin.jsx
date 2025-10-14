@@ -13,7 +13,7 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 max-w-7xl flex items-center justify-between relative">
+    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 max-w-7xl flex items-center justify-between relative sticky top-0 z-50">
       {/* Logo */}
       <div className="flex items-center">
         <NavLink to="/">
@@ -79,7 +79,7 @@ const Nav = () => {
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="absolute top-full mt-2 left-0 bg-white rounded-xl flex flex-col space-y-4 py-6 px-6 lg:hidden z-50 w-full">
+        <div className="absolute top-full mt-0 left-0 bg-white rounded-xl flex flex-col space-y-4 py-6 px-6 lg:hidden z-50 w-full">
           <div className="flex flex-col space-y-2 text-[#1A5276] font-medium items-start w-full">
             {menuItems.map((item) => (
               <NavLink
@@ -88,8 +88,8 @@ const Nav = () => {
                 onClick={() => setOpen(false)} // close menu after click
                 className={({ isActive }) =>
                   isActive
-                    ? "w-full py-2 px-2 rounded text-green-500 hover:text-[#FF7A00] transition-colors"
-                    : "w-full py-2 px-2 rounded text-[#1A5276] hover:text-[#FF7A00] transition-colors"
+                    ? "w-full py-1 px-2 rounded text-green-500 hover:text-[#FF7A00] transition-colors"
+                    : "w-full py-1 px-2 rounded text-[#1A5276] hover:text-[#FF7A00] transition-colors"
                 }
               >
                 {item.name}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   FiSearch,
   FiMoon,
+  FiSun,  // Sun icon for dark mode
   FiUser,
   FiMenu,
   FiX,
@@ -14,6 +15,7 @@ import { NavLink } from "react-router-dom";
 const NavBar = () => {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);  // state for dark mode
   const profileRef = useRef(null);
 
   const menuItems = [
@@ -34,8 +36,14 @@ const NavBar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.body.classList.toggle("dark", !darkMode);  // Apply/remove dark mode class
+  };
+
   return (
-    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 md:px-12 max-w-7xl flex items-center justify-between relative">
+    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 md:px-12 max-w-7xl flex items-center justify-between relative sticky top-0 z-50">
       {/* Logo */}
       <div className="flex items-center">
         <NavLink to="/">
@@ -81,8 +89,13 @@ const NavBar = () => {
           <button
             aria-label="Toggle dark mode"
             className="p-2 hover:bg-gray-100 rounded-full hover:text-[#FF7A00] transition-colors"
+            onClick={toggleDarkMode} // Toggle dark mode on click
           >
-            <FiMoon size={24} />
+            {darkMode ? (
+              <FiSun size={24} />  // Sun icon when dark mode is on
+            ) : (
+              <FiMoon size={24} />  // Moon icon for light mode
+            )}
           </button>
 
           {/* Profile dropdown */}
@@ -104,14 +117,14 @@ const NavBar = () => {
             >
               <NavLink
                 to="/profile"
-                className={({ isActive }) => isActive? "flex items-center px-4 py-3 text-green-500 hover:bg-gray-50 hover:text-[#FF7A00] transition-colors" : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"}
+                className={({ isActive }) => (isActive ? "flex items-center px-4 py-3 text-green-500 hover:bg-gray-50 hover:text-[#FF7A00] transition-colors" : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors")}
               >
                 <CgProfile className="mr-3" size={20} /> My Profile
               </NavLink>
               <hr />
               <NavLink
                 to="/saved-jobs"
-                className={({isActive}) => isActive? "flex items-center px-4 py-3 text-green-500 hover:bg-gray-50 hover:text-[#FF7A00] transition-colors" : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"}
+                className={({ isActive }) => (isActive ? "flex items-center px-4 py-3 text-green-500 hover:bg-gray-50 hover:text-[#FF7A00] transition-colors" : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors")}
               >
                 <FiBookmark className="mr-3" size={20} /> My Saved Jobs
               </NavLink>
@@ -137,10 +150,8 @@ const NavBar = () => {
 
       {/* Mobile/Tablet Menu */}
       <div
-        className={`lg:hidden absolute top-full left-0 w-full bg-white rounded-b-2xl transition-all duration-300 z-10 ${
-          open
-            ? "max-h-screen opacity-100"
-            : "max-h-0 opacity-0 overflow-hidden"
+        className={`lg:hidden absolute top-full left-0 w-full bg-white rounded-xl transition-all duration-300 z-10 ${
+          open ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
         <div className="flex flex-col space-y-4 p-6 text-[#1A5276] font-medium">
@@ -151,8 +162,8 @@ const NavBar = () => {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 isActive
-                  ? "text-green-500 hover:text-[#FF7A00] transition-colors"
-                  : "hover:text-[#FF7A00] transition-colors"
+                  ? "text-green-500 hover:text-[#FF7A00] transition-colors px-2"
+                  : "hover:text-[#FF7A00] transition-colors px-2 "
               }
             >
               {item.name}
@@ -174,18 +185,19 @@ const NavBar = () => {
             to="/profile"
             className={({ isActive }) =>
               isActive
-                ? "flex items-center px-2 py-2 text-green-500 hover:text-[#FF7A00] transition-colors"
-                : "flex items-center px-2 py-2 hover:text-[#FF7A00] transition-colors"
+                ? "flex items-center px-2  text-green-500 hover:text-[#FF7A00] transition-colors"
+                : "flex items-center px-2  hover:text-[#FF7A00] transition-colors"
             }
           >
             <CgProfile className="mr-3" size={20} /> My Profile
           </NavLink>
           <NavLink
             to="/saved-jobs"
-            className={({ isActive }) => isActive
+            className={({ isActive }) =>
+              isActive
                 ? "flex items-center px-2 py-2 text-green-500 hover:text-[#FF7A00] transition-colors"
                 : "flex items-center px-2 py-2 hover:text-[#FF7A00] transition-colors"
-          }
+            }
           >
             <FiBookmark className="mr-3" size={20} /> My Saved Jobs
           </NavLink>
