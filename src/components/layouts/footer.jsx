@@ -4,6 +4,7 @@ import { TiSocialFacebookCircular } from "react-icons/ti";
 import { LiaTelegram } from "react-icons/lia";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { GrLocation } from "react-icons/gr";
+import { NavLink } from 'react-router';
 
 const Footer = () => {
   // Define a color variable consistent with the lucide icon styling
@@ -11,7 +12,7 @@ const Footer = () => {
   const ACCENT_HOVER_COLOR = "hover:text-[#FF7A00]";
 
   return (
-    <footer className="bg-[#EFF7FF] py-8 text-[#1A5276] font-sans">
+    <footer className="bg-[#EFF7FF] py-8 text-[#1A5276] font-Poppins">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Grid/Flex Container: Stacks on small screens, becomes a row on medium screens */}
         <div className="flex flex-col md:flex-row flex-wrap justify-between items-center md:items-start space-y-8 md:space-y-0 md:space-x-4 lg:space-x-16">
@@ -39,10 +40,10 @@ const Footer = () => {
           <div className="flex-1 w-full md:w-auto md:max-w-[20%] text-center md:text-left">
             <h4 className="font-bold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:underline hover:text-[#FF7A00]">Home</a></li>
-              <li><a href="#" className="hover:underline hover:text-[#FF7A00]">Find Jobs</a></li>
-              <li><a href="#" className="hover:underline hover:text-[#FF7A00]">About Us</a></li>
-              <li><a href="#" className="hover:underline hover:text-[#FF7A00]">Contact Us</a></li>
+              <li><NavLink to="/" className="hover:underline hover:text-[#FF7A00]">Home</NavLink></li>
+              <li><NavLink to="/jobs" className="hover:underline hover:text-[#FF7A00]">Find Jobs</NavLink></li>
+              <li><NavLink to="/about" className="hover:underline hover:text-[#FF7A00]">About Us</NavLink></li>
+              <li><NavLink to="/contact" className="hover:underline hover:text-[#FF7A00]">Contact Us</NavLink></li>
             </ul>
           </div>
 
@@ -58,7 +59,7 @@ const Footer = () => {
                 {/* Email Address */}
                 <div className="flex items-start space-x-2 justify-center sm:justify-start"> 
                   {/* Adjusted mt-1 to mt-0.5 for slight alignment shift */}
-                  <MdMailOutline className={`text-xl flex-shrink-0 mt-0.5`} /> 
+                  <MdMailOutline className={`text-xl flex-shrink-0 mt-0.5 hover:text-[#FF7A00]`} /> 
                   <span className="text-left">info@jobcollap.com</span> 
                 </div>
                 
@@ -66,7 +67,7 @@ const Footer = () => {
                 <div className="flex items-start space-x-2 text-[#1A5276] justify-center sm:justify-start">
                   
                   <GrLocation 
-                    className={`text-xl flex-shrink-0 mt-0.5`} 
+                    className={`text-xl flex-shrink-0 mt-0.5 hover:text-[#FF7A00]`} 
                   />
                   
 
@@ -86,15 +87,15 @@ const Footer = () => {
               <h4 className="font-bold text-lg mb-4">Follow Us</h4>
               <div className="flex justify-center sm:justify-center space-x-2.5 text-2xl ">
                 {/* TiSocialFacebookCircular is already a React Icon, keeping it */}
-                <a href="#" aria-label="Facebook" className={` transition-colors duration-300 text-right `}>
+                <a href="#" aria-label="Facebook" className={` transition-colors duration-300 text-right hover:text-[#FF7A00]`}>
                   <TiSocialFacebookCircular />
                 </a>
                 {/* LiaTelegram is already a React Icon, keeping it */}
-                <a href="#" aria-label="Telegram" className={` transition-colors duration-300`}>
+                <a href="#" aria-label="Telegram" className={` transition-colors duration-300 hover:text-[#FF7A00]`}>
                   <LiaTelegram />
                 </a>
                 {/* AiOutlineYoutube is already a React Icon, keeping it */}
-                <a href="#" aria-label="YouTube" className={` transition-colors duration-300`}>
+                <a href="#" aria-label="YouTube" className={` transition-colors duration-300 hover:text-[#FF7A00]`}>
                   <AiOutlineYoutube />
                 </a>
               </div>
