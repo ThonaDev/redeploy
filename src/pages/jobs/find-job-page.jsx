@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-// IMPORT BOTH ICONS HERE
-import { HiOutlineBookmark, HiBookmark } from "react-icons/hi";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
-import { FiMapPin } from 'react-icons/fi';
 import { HiOutlineChevronDown } from 'react-icons/hi';
+import SingleJobCard from '../../components/card/jobs/single-job-card';
+import { useGetAllJobsQuery, useGetPaginatedJobsQuery, useGetLatestJobsQuery } from '../../features/job/jobSlice';
 
-// Reusable Dropdown component for filters (NO CHANGES HERE)
+// Reusable Dropdown component for filters (NO CHANGES)
 const Dropdown = ({ label, options, onSelect, className }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(label);
@@ -13,13 +11,11 @@ const Dropdown = ({ label, options, onSelect, className }) => {
 
     // Reset selected label when options change (e.g., when API data loads)
     useEffect(() => {
-        // Only reset to label if the selected value is no longer in options
         if (!options.includes(selected) && selected !== label) {
             setSelected(label);
         }
-        // Ensure the label state is set correctly when options load
         if (options.length > 1 && selected === label) {
-             setSelected(label);
+            setSelected(label);
         }
     }, [label, options, selected]);
 
@@ -37,8 +33,7 @@ const Dropdown = ({ label, options, onSelect, className }) => {
 
     const handleSelect = (option) => {
         setSelected(option);
-        // Pass the selection up to the parent component
-        onSelect(option === label ? '' : option); 
+        onSelect(option === label ? '' : option);
         setIsOpen(false);
     };
 
@@ -68,67 +63,14 @@ const Dropdown = ({ label, options, onSelect, className }) => {
     );
 };
 
-// 🌟 Job Card component (No functional changes here)
-const JobCard = ({ jobTitle, postDate, location, salary, Photos, jobUuid }) => {
-    // Track the bookmark status for this specific card
-    const [isBookmarked, setIsBookmarked] = useState(false); 
-    
-    const photoUrl = Photos && Photos.length > 0 ? Photos[0].url : 'https://via.placeholder.com/400x200';
-
-    // Function to toggle the bookmark state
-    const handleBookmarkClick = (e) => {
-        e.stopPropagation(); // Prevents card click logic if any
-        setIsBookmarked(!isBookmarked);
-        console.log(`Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`);
-    };
-
-    return (
-        <div className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-none shadow-md overflow-hidden">
-            <div className="relative">
-                <img
-                    src={photoUrl}
-                    alt="Job listing visual"
-                    className="w-full h-48 object-cover p-4 rounded-[20px]"
-                />
-                <button 
-                    aria-label="Bookmark job" 
-                    className="absolute top-5 right-5 bg-white rounded-full p-2 shadow-md"
-                    onClick={handleBookmarkClick} 
-                >
-                    {isBookmarked ? (
-                        <FaBookmark color="#FF7A00" size={24}/>
-                    ) : (
-                        <FaRegBookmark color="#FF7A00" size={24}/>
-                    )}
-                </button>
-            </div>
-            <div className="px-4">
-                <h2 className="text-xl md:text-2xl text-left font-bold text-[#1A5276] mb-2">{jobTitle}</h2>
-                <div className="text-sm text-[#1A5276] mb-2">
-                    <span className="mr-4">Posted: {new Date(postDate).toLocaleDateString()}</span>
-                    <span className="flex items-center"><FiMapPin size={16} className="mr-1" />{location}</span>
-                </div>
-                <hr className="border-t border-gray-200 mb-2" />
-                <div className="flex items-center justify-between pb-4 pt-2">
-                    <span className="text-xl font-bold text-[#1A5276]">{salary}$</span>
-                    <button className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm">
-                        Apply
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// Main App component with dynamic fetching and filtering
-const FindJob = () => {
+// Main App component with RTK Query fetching and filtering
+const FindJobPage = () => {
     // Data states
     const [jobs, setJobs] = useState([]);
     const [latestJobs, setLatestJobs] = useState([]);
     const [allJobContent, setAllJobContent] = useState([]); // Store all jobs for filtering
     
     // UI/Loading states
-    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0); 
     const [totalPages, setTotalPages] = useState(0);
     
@@ -136,111 +78,83 @@ const FindJob = () => {
     const [categories, setCategories] = useState(['All Categories']);
     const [experiences, setExperiences] = useState(['All Experiences']);
     const [locations, setLocations] = useState(['All Locations']);
-    const [salaries, setSalaries] = useState(['All Projects']);
+    const [salaries, setSalaries] = useState(['All Prices']);
     const [workingTimes, setWorkingTimes] = useState(['All Working Hours']);
 
-    // 🌟 FILTER SELECTION STATES
+    // FILTER SELECTION STATES
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedExperience, setSelectedExperience] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('');
     const [selectedSalary, setSelectedSalary] = useState('');
     const [selectedWorkingTime, setSelectedWorkingTime] = useState('');
 
+    // RTK Query hooks for fetching data
+    const { data: allJobsData, isLoading: allJobsLoading, error: allJobsError } = useGetAllJobsQuery();
+    const { data: paginatedJobsData, isLoading: paginatedJobsLoading, error: paginatedJobsError } = useGetPaginatedJobsQuery({ pageNumber: currentPage, pageSize: 6 });
+    const { data: latestJobsData, isLoading: latestJobsLoading, error: latestJobsError } = useGetLatestJobsQuery();
 
     useEffect(() => {
-        const fetchJobs = async () => {
-            setLoading(true);
-            try {
-                // Fetch ALL jobs to collect all unique filter values
-                const allJobsResponse = await fetch(`https://job-api.sokpheng.com/api/v1/jobs?pageNumber=0&pageSize=1000`);
-                
-                // Fetch the main paginated jobs (used for the initial display/pagination)
-                const paginatedJobsResponse = await fetch(`https://job-api.sokpheng.com/api/v1/jobs?pageNumber=${currentPage}&pageSize=6&sortBy=RANDOM`);
-                
-                // Fetch the latest 3 jobs
-                const latestJobsResponse = await fetch(`https://job-api.sokpheng.com/api/v1/jobs?pageNumber=0&pageSize=3&sortBy=createdDate&sortDirection=desc`);
+        if (allJobsError || paginatedJobsError || latestJobsError) {
+            console.error("Failed to fetch jobs:", allJobsError || paginatedJobsError || latestJobsError);
+        }
 
+        if (allJobsData) {
+            const allContent = allJobsData.data.content || [];
+            setAllJobContent(allContent);
 
-                if (!paginatedJobsResponse.ok || !allJobsResponse.ok || !latestJobsResponse.ok) {
-                    throw new Error("Failed to fetch job data from one or more endpoints.");
-                }
-                
-                const paginatedJobsData = await paginatedJobsResponse.json();
-                const allJobsData = await allJobsResponse.json();
-                const latestJobsData = await latestJobsResponse.json();
+            // Extract and set unique values for all dropdowns
+            // --- Categories (from jobTitle) ---
+            const allCategories = allContent.map(job => job.jobTitle).filter(Boolean);
+            const uniqueCategories = [...new Set(allCategories)].sort();
+            setCategories(['All Categories', ...uniqueCategories]);
 
-                setJobs(paginatedJobsData.data.content);
-                setTotalPages(paginatedJobsData.data.totalPages);
-                setLatestJobs(latestJobsData.data.content);
-                setAllJobContent(allJobsData.data.content); // Store all jobs for client-side filtering
+            // --- Experiences (from requirementExperience, formatted) ---
+            const allExperiences = allContent.map(job => job.requirementExperience).filter(num => typeof num === 'number' && num >= 0);
+            const uniqueExperiences = [...new Set(allExperiences)]
+                .sort((a, b) => a - b)
+                .map(exp => (exp === 0 ? 'No experience' : `${exp} year${exp > 1 ? 's' : ''} experiences`));
+            setExperiences(['All Experiences', ...uniqueExperiences]);
 
+            // --- Locations (from location) ---
+            const allLocations = allContent.map(job => job.location).filter(Boolean);
+            const uniqueLocations = [...new Set(allLocations)].sort();
+            setLocations(['All Locations', ...uniqueLocations]);
 
-                // 🌟 Extract and set unique values for all dropdowns
-                const allContent = allJobsData.data.content;
+            // --- Project Price / Salary (from salary, sorted and formatted with $) ---
+            const allSalaries = allContent.map(job => job.salary).filter(num => typeof num === 'number' && num > 0);
+            const uniqueSalaries = [...new Set(allSalaries)]
+                .sort((a, b) => a - b) 
+                .map(salary => `${salary.toFixed(0)}$`); 
+            setSalaries(['All Prices', ...uniqueSalaries]);
+            
+            // --- Working Hours (from workingTime) ---
+            const allWorkingTimes = allContent.map(job => job.workingTime).filter(Boolean);
+            const uniqueWorkingTimes = [...new Set(allWorkingTimes)].sort();
+            setWorkingTimes(['All Working Hours', ...uniqueWorkingTimes]);
+        }
 
-                // --- Categories (from jobTitle) ---
-                const allCategories = allContent.map(job => job.jobTitle).filter(Boolean);
-                const uniqueCategories = [...new Set(allCategories)].sort();
-                setCategories(['All Categories', ...uniqueCategories]);
+        if (paginatedJobsData) {
+            setJobs(paginatedJobsData.data.content || []);
+            setTotalPages(paginatedJobsData.data.totalPages || 0);
+        }
 
-                // --- Experiences (from requirementExperience, formatted) ---
-                const allExperiences = allContent.map(job => job.requirementExperience).filter(num => typeof num === 'number' && num >= 0);
-                const uniqueExperiences = [...new Set(allExperiences)]
-                    .sort((a, b) => a - b)
-                    .map(exp => (exp === 0 ? 'No experience' : `${exp} year${exp > 1 ? 's' : ''} experiences`));
-                setExperiences(['All Experiences', ...uniqueExperiences]);
+        if (latestJobsData) {
+            setLatestJobs(latestJobsData.data.content || []);
+        }
+    }, [allJobsData, paginatedJobsData, latestJobsData, allJobsError, paginatedJobsError, latestJobsError]);
 
-                // --- Locations (from location) ---
-                const allLocations = allContent.map(job => job.location).filter(Boolean);
-                const uniqueLocations = [...new Set(allLocations)].sort();
-                setLocations(['All Locations', ...uniqueLocations]);
-
-                // --- Project Price / Salary (from salary, sorted and formatted with $) ---
-                const allSalaries = allContent.map(job => job.salary).filter(num => typeof num === 'number' && num > 0);
-                const uniqueSalaries = [...new Set(allSalaries)]
-                    .sort((a, b) => a - b) 
-                    .map(salary => `${salary.toFixed(0)}$`); 
-                setSalaries(['All Projects', ...uniqueSalaries]);
-                
-                // --- Working Hours (from workingTime) ---
-                const allWorkingTimes = allContent.map(job => job.workingTime).filter(Boolean);
-                const uniqueWorkingTimes = [...new Set(allWorkingTimes)].sort();
-                setWorkingTimes(['All Working Hours', ...uniqueWorkingTimes]);
-
-
-            } catch (error) {
-                console.error("Failed to fetch jobs:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchJobs();
-    }, [currentPage]); // Re-fetch only if page changes
-
-    // 🌟 FILTERING LOGIC
+    // FILTERING LOGIC
     const filteredJobs = allJobContent.filter(job => {
         const matchesCategory = !selectedCategory || job.jobTitle === selectedCategory;
-
-        // Extract raw number from experience string for comparison
         const matchesExperience = !selectedExperience || 
             (selectedExperience === 'No experience' && job.requirementExperience === 0) ||
             (selectedExperience.includes('years') && job.requirementExperience === parseInt(selectedExperience));
-
         const matchesLocation = !selectedLocation || job.location === selectedLocation;
-
-        // Extract raw number from salary string for comparison
         const matchesSalary = !selectedSalary || job.salary === parseInt(selectedSalary);
-
         const matchesWorkingTime = !selectedWorkingTime || job.workingTime === selectedWorkingTime;
 
         return matchesCategory && matchesExperience && matchesLocation && matchesSalary && matchesWorkingTime;
     });
-
-    // 🌟 PAGINATION FOR FILTERED RESULTS (optional, for a full implementation)
-    // For simplicity, we will display all filtered results for now. 
-    // To implement pagination on filtered results, you'd need to paginate `filteredJobs`.
-    // The existing pagination only applies to the initial random API fetch.
 
     // Page handling for the initial random view
     const handlePageChange = (page) => {
@@ -251,7 +165,6 @@ const FindJob = () => {
     };
 
     const renderPageNumbers = () => {
-        // ... (Pagination logic remains the same for the initial random fetch)
         const pageNumbers = [];
         const maxPagesToShow = 5;
         let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
@@ -282,7 +195,7 @@ const FindJob = () => {
         return pageNumbers;
     };
 
-    if (loading) {
+    if (allJobsLoading || paginatedJobsLoading || latestJobsLoading) {
         return (
             <div className="min-h-screen bg-gray-100 flex items-center justify-center">
                 <p className="text-[#1A5276]">Loading jobs...</p>
@@ -301,47 +214,35 @@ const FindJob = () => {
             </header>
             <section className="flex flex-col items-center gap-4 mb-10 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-                    
-                    {/* Categories (Job Title) */}
                     <div className="flex flex-col">
                         <label className="text-[#1A5276] font-medium text-lg mb-2">Categories</label>
                         <Dropdown label="All Categories" options={categories} onSelect={setSelectedCategory} />
                     </div>
-                    
-                    {/* Experiences (requirementExperience) */}
                     <div className="flex flex-col">
                         <label className="text-[#1A5276] font-medium text-lg mb-2">Experiences</label>
                         <Dropdown label="All Experiences" options={experiences} onSelect={setSelectedExperience} />
                     </div>
-                    
-                    {/* Locations */}
                     <div className="flex flex-col">
                         <label className="text-[#1A5276] font-medium text-lg mb-2">Locations</label>
                         <Dropdown label="All Locations" options={locations} onSelect={setSelectedLocation} />
                     </div>
-                    
-                    {/* 🌟 Project Price (Salary) */}
                     <div className="flex flex-col">
                         <label className="text-[#1A5276] font-medium text-lg mb-2">Project Price</label>
                         <Dropdown label="All Prices" options={salaries} onSelect={setSelectedSalary} />
                     </div>
-                    
-                    {/* Working Hour (workingTime) */}
                     <div className="flex flex-col">
                         <label className="text-[#1A5276] font-medium text-lg mb-2">Working Hour</label>
                         <Dropdown label="All Working Hours" options={workingTimes} onSelect={setSelectedWorkingTime} />
                     </div>
                 </div>
             </section>
-            
             <section className="max-w-7xl mx-auto mb-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {jobsToDisplay.length > 0 ? (
                         jobsToDisplay.map((job) => (
-                            <JobCard
+                            <SingleJobCard
                                 key={job.uuid}
                                 jobUuid={job.uuid}
-                                companyName={job.companyName || "Company Name"}
                                 jobTitle={job.jobTitle}
                                 postDate={job.createdDate}
                                 location={job.location}
@@ -356,8 +257,6 @@ const FindJob = () => {
                     )}
                 </div>
             </section>
-            
-            {/* Show pagination only if no filters are currently active */}
             {!isFiltered && totalPages > 1 && (
                 <div className="flex items-center justify-center space-x-2 mt-8 mb-12">
                     <button
@@ -395,16 +294,14 @@ const FindJob = () => {
                     </button>
                 </div>
             )}
-            
             <section className="max-w-7xl mx-auto mb-12">
                 <h2 className="text-3xl sm:text-4xl font-bold text-[#1A5276] text-center mb-8">Latest Jobs</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {latestJobs.length > 0 ? (
                         latestJobs.map((job) => (
-                            <JobCard
+                            <SingleJobCard
                                 key={job.uuid}
                                 jobUuid={job.uuid}
-                                companyName={job.companyName || "Company Name"}
                                 jobTitle={job.jobTitle}
                                 postDate={job.createdDate}
                                 location={job.location}
@@ -421,4 +318,4 @@ const FindJob = () => {
     );
 };
 
-export default FindJob;
+export default FindJobPage;
