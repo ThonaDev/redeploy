@@ -12,7 +12,7 @@ const Footer = () => {
   const ACCENT_HOVER_COLOR = "hover:text-[#FF7A00]";
 
   return (
-    <footer className="bg-[#EFF7FF] py-8 text-[#1A5276] font-Poppins">
+    <footer className=" py-8 text-[#1A5276] font-Poppins">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Grid/Flex Container: Stacks on small screens, becomes a row on medium screens */}
         <div className="flex flex-col md:flex-row flex-wrap justify-between items-center md:items-start space-y-8 md:space-y-0 md:space-x-4 lg:space-x-16">
@@ -103,7 +103,7 @@ const Footer = () => {
           </div>
         </div>
        {/* Copyright Section */}
-       <div className="mt-8 pt-4 border-t border-t-[#c4d4e3] text-[#1A5276] bg-[#EFF7FF]">
+       <div className="mt-8 pt-4 border-t border-t-[#c4d4e3] text-[#1A5276] ">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-[#1A5276] text-sm py-2">
             <p className="flex justify-center items-center space-x-1">
               <span className="text-xl">©</span>
