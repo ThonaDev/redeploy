@@ -1,5 +1,14 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
+import NavBar from "../../components/layouts/navbar-afterLogin";
+import Herosection from "./herosection";
 
-export default function HomePage() {
-  return <div className="bg-amber-300">homepage</div>;
-}
+const Homepage = () => {
+  return (
+    <>
+      <Herosection/>
+    </>
+  );
+};
+
+export default Homepage;
