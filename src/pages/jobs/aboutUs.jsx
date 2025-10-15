@@ -20,9 +20,9 @@ export default function About() {
     }
   };
   return (
-    <>
+    <section className="absolute top-0 w-full">
       {/* ====== About Section ====== */}
-      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-6">
+      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-6 pt-20">
         {/* <NavBar className="mb-16 " /> */}
         <div className="max-w-7xl mx-auto py-10 px-16 grid md:grid-cols-2 gap-24 items-center">
           {/* Left Side: Text */}
@@ -175,6 +175,6 @@ export default function About() {
           </div>
         </section>
       </div>
-    </>
+    </section>
   );
 }

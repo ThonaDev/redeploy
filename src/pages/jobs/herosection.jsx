@@ -4,7 +4,7 @@ import NavBar from "../../components/layouts/navbar-afterLogin";
 
 const Herosection = () => {
   return (
-    <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white py-6 px-6 sm:px-12 md:px-24 lg:px-32 xl:px-40">
+    <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-4 pt-20 px-6 sm:px-12 md:px-24 lg:px-32 xl:px-40 absolute top-0">
       {/* <NavBar className="mb-16" /> */}
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center pt-16">
         {/* Left Content */}
@@ -16,8 +16,7 @@ const Herosection = () => {
 
           <p className="text-[#1A5276] font-poppins text-base sm:text-lg md:text-lg xl:text-xl max-w-md md:max-w-lg mx-auto md:mx-0 leading-relaxed">
             Hire world-class freelancers, collaborate on real-world projects, or
-            level up with peer-driven learning – 
-            all in one place.
+            level up with peer-driven learning – all in one place.
           </p>
 
           <NavLink

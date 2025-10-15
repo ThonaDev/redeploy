@@ -2,14 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyDwaKYIjSMHIkYQh_BMgNSHg0j8Ucc2EOE",
+  authDomain: "jobcollap-fcd01.firebaseapp.com",
+  projectId: "jobcollap-fcd01",
+  storageBucket: "jobcollap-fcd01.firebasestorage.app",
+  messagingSenderId: "644320079783",
+  appId: "1:644320079783:web:7bb3acf7723de27b6a5082",
+  measurementId: "G-CX9DSG51FV"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
 export const auth = getAuth(app);

@@ -12,6 +12,11 @@ import ResetPassword from "./pages/auth/resetpassword"; // ✅ new import
 import RootLayout from "./components/layouts/root-layout";
 import App from "./App";
 import { StrictMode } from "react";
+import FindJobPage from "./pages/jobs/find-job-page";
+import About from "./pages/jobs/aboutUs";
+import ContactUs from "./pages/jobs/contactUs";
+import Profile from "./pages/jobs/profile-details";
+import Mysavedjobs from "./pages/jobs/mysaved-job";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -20,6 +25,12 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           <Route element={<RootLayout />}>
             <Route path="/" element={<App />} />
+            {/* sunnich */}
+            <Route path="/jobs" element={<FindJobPage />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/saved-jobs" element={<Mysavedjobs />} />
           </Route>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />

@@ -208,7 +208,7 @@ const FindJobPage = () => {
     const jobsToDisplay = isFiltered ? filteredJobs : jobs;
 
     return (
-        <div className="min-h-screen font-sans mx-[105px] bg-[#F5F5F5]">
+        <div className="min-h-screen font-sans mx-[105px]">
             <header className="mb-8 md:mb-12 text-center">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A5276]">Find your dream jobs</h1>
             </header>

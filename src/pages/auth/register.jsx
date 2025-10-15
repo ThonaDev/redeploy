@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Added for navigation
-import { FaEye, FaEyeSlash, FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,6 +15,16 @@ import * as z from "zod";
 
 // Redux and API integrations
 import { useRegisterMutation } from "../../features/api/apiSlice";
+
+import {
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  signInWithPopup,
+  fetchSignInMethodsForEmail,
+  signOut,
+  signInWithCredential,
+} from "firebase/auth";
+import { auth } from "../../firebase/firebase-config";
 
 // Password regex
 const strongPasswordRegex = new RegExp(
@@ -40,9 +50,7 @@ const registerSchema = z
         strongPasswordRegex,
         "Password must include an uppercase letter, a lowercase letter, a number, and a symbol (e.g., Sokeang@1234)"
       ),
-    confirmPassword: z
-      .string()
-      .nonempty("Confirm password is required"),
+    confirmPassword: z.string().nonempty("Confirm password is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -73,6 +81,7 @@ export default function Register() {
   // State for showing/hiding passwords
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSocialLoading, setIsSocialLoading] = useState(false); // ✅ Added this line
   const navigate = useNavigate();
 
   // RTK Query mutation for register
@@ -96,19 +105,13 @@ export default function Register() {
 
   // Form submission handler
   const onSubmit = async (data) => {
-    // 'data' is the validated form object: { userName, email, password, confirmPassword }
-    // We only send userName, email, and password to the server
     const { userName, email, password } = data;
 
     try {
-      // Call register mutation
       const result = await registerUser({ userName, email, password }).unwrap();
       console.log("✅ Registered:", result);
 
-      // If register returns a token (adjust based on your API response)
       if (result?.token) {
-        // Optional: For consistency with login, you could dispatch setCredentials and store tokens here
-        // But since it's register, and code redirects to login, keep localStorage as-is
         localStorage.setItem("accessToken", result.token);
       }
 
@@ -117,25 +120,69 @@ export default function Register() {
         { position: "top-center", autoClose: 5000 }
       );
 
-      // Reset form
       reset();
-
-      // Set flag and redirect to login (or uncomment to auto-redirect)
       localStorage.setItem("redirectToLogin", "true");
-      // navigate("/login"); // Optional: Auto-redirect
     } catch (err) {
       console.error("❌ Registration failed:", err);
-      toast.error(err?.data?.message || "Registration failed! Please try again.", {
-        position: "top-center",
-        autoClose: 5000,
-      });
+      toast.error(
+        err?.data?.message || "Registration failed! Please try again.",
+        {
+          position: "top-center",
+          autoClose: 5000,
+        }
+      );
     }
   };
 
-  // Placeholder handlers for social logins (implement as needed)
-  const gitHubLogin = () => toast.info("GitHub login coming soon!");
-  const linkedInLogin = () => toast.info("LinkedIn login coming soon!");
-  const googleLogin = () => toast.info("Google login coming soon!");
+  // Social login
+  const handleSocialLogin = async (providerType) => {
+    try {
+      setIsSocialLoading(true);
+      await signOut(auth);
+
+      const provider =
+        providerType === "github"
+          ? new GithubAuthProvider()
+          : new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      console.log(`${providerType} user:`, user);
+      toast.success(`✅ Registerd in with ${providerType}`, {
+        position: "top-center",
+        autoClose: 2500,
+      });
+      navigate("/");
+    } catch (error) {
+      console.error(`${providerType} Register error:`, error);
+
+      if (error.code === "auth/account-exists-with-different-credential") {
+        const email = error.customData.email;
+        const pendingCred =
+          providerType === "github"
+            ? GithubAuthProvider.credentialFromError(error)
+            : GoogleAuthProvider.credentialFromError(error);
+
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        toast.error(
+          `Email already exists with ${methods.join(
+            ", "
+          )}. Please login using that provider first.`,
+          {
+            position: "top-center",
+            autoClose: 5000,
+          }
+        );
+      } else {
+        toast.error(`🚨 ${providerType} Register failed`, {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      }
+    } finally {
+      setIsSocialLoading(false);
+    }
+  };
 
   return (
     <ErrorBoundary>
@@ -145,10 +192,18 @@ export default function Register() {
           <div className="hidden md:flex md:w-1/2 flex-col items-center justify-start bg-[#ECF2FF] p-8 relative">
             <div className="absolute top-8 left-8 flex flex-col items-start">
               <h1 className="text-3xl font-bold text-[#1A5276]">Welcome to</h1>
-              <img src={JOBCollapLogo} alt="JOBCollap Logo" className="h-12 mt-1" />
+              <img
+                src={JOBCollapLogo}
+                alt="JOBCollap Logo"
+                className="h-12 mt-1"
+              />
             </div>
             <div className="text-center w-full max-w-sm mt-14">
-              <img src={RegisterImage} alt="Sign up illustration" className="max-w-md h-auto mx-auto" />
+              <img
+                src={RegisterImage}
+                alt="Sign up illustration"
+                className="max-w-md h-auto mx-auto"
+              />
             </div>
           </div>
 
@@ -156,39 +211,63 @@ export default function Register() {
           <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-10 bg-[#ECF2FF]">
             <div className="md:hidden text-center mb-6">
               <h1 className="text-2xl font-bold text-[#1A5276]">Welcome to </h1>
-              <img src={JOBCollapLogo} alt="JOBCollap Logo" className="h-10 mx-auto mt-2" />
+              <img
+                src={JOBCollapLogo}
+                alt="JOBCollap Logo"
+                className="h-10 mx-auto mt-2"
+              />
             </div>
 
-            <h2 className="text-3xl text-center font-bold text-[#1A5276] mb-6">Register</h2>
+            <h2 className="text-3xl text-center font-bold text-[#1A5276] mb-6">
+              Register
+            </h2>
 
-            <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 flex flex-col items-center w-full">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              noValidate
+              className="space-y-4 flex flex-col items-center w-full"
+            >
               {/* Username */}
               <div className="w-full">
-                <label className="block text-md font-bold text-[#1A5276]">Username</label>
+                <label className="block text-md font-bold text-[#1A5276]">
+                  Username
+                </label>
                 <input
                   type="text"
                   placeholder="Sokkeang"
                   {...register("userName")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />
-                {errors.userName && <p className="text-red-600 text-sm mt-1">{errors.userName.message}</p>}
+                {errors.userName && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.userName.message}
+                  </p>
+                )}
               </div>
 
               {/* Email */}
               <div className="w-full">
-                <label className="block text-md font-bold text-[#1A5276]">Email</label>
+                <label className="block text-md font-bold text-[#1A5276]">
+                  Email
+                </label>
                 <input
-                  type="email" // Changed to email for better UX
+                  type="email"
                   placeholder="Sokkeang123@gmail.com"
                   {...register("email")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />
-                {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
 
               {/* Password */}
               <div className="relative w-full">
-                <label className="block text-md font-bold text-[#1A5276]">Password</label>
+                <label className="block text-md font-bold text-[#1A5276]">
+                  Password
+                </label>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Sok1234#!"
@@ -201,14 +280,24 @@ export default function Register() {
                   className="absolute top-9 right-3 text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                  {showPassword ? (
+                    <FaEye size={18} />
+                  ) : (
+                    <FaEyeSlash size={18} />
+                  )}
                 </button>
-                {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               {/* Confirm Password */}
               <div className="relative w-full">
-                <label className="block text-md font-bold text-[#1A5276]">Confirm Password</label>
+                <label className="block text-md font-bold text-[#1A5276]">
+                  Confirm Password
+                </label>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Sok1234#!"
@@ -221,10 +310,16 @@ export default function Register() {
                   className="absolute top-9 right-3 text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                  {showConfirmPassword ? (
+                    <FaEye size={18} />
+                  ) : (
+                    <FaEyeSlash size={18} />
+                  )}
                 </button>
                 {errors.confirmPassword && (
-                  <p className="text-red-600 text-sm mt-1">{errors.confirmPassword.message}</p>
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
@@ -237,21 +332,26 @@ export default function Register() {
               </button>
             </form>
 
-            {/* Social login */}
             <div className="mt-6 text-center w-full">
               <p className="text-lg mb-3 text-[#1A5276]">Login with</p>
               <div className="flex justify-center space-x-5 text-3xl">
                 <FaGithub
-                  onClick={gitHubLogin}
-                  className="cursor-pointer text-black hover:scale-110 transition"
-                />
-                <FaLinkedin
-                  onClick={linkedInLogin}
-                  className="cursor-pointer text-blue-700 hover:scale-110 transition"
+                  size={42}
+                  onClick={() =>
+                    !isSocialLoading && handleSocialLogin("github")
+                  }
+                  className={`cursor-pointer text-black hover:scale-110 transition ${
+                    isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
                 />
                 <FcGoogle
-                  onClick={googleLogin}
-                  className="cursor-pointer hover:scale-110 transition"
+                  size={48}
+                  onClick={() =>
+                    !isSocialLoading && handleSocialLogin("google")
+                  }
+                  className={`cursor-pointer hover:scale-110 transition ${
+                    isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
                 />
               </div>
             </div>

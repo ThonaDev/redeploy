@@ -13,7 +13,7 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 max-w-7xl flex items-center justify-between relative sticky top-0 z-50">
+    <nav className="bg-white p-4 rounded-[20px] mx-auto px-12 max-w-7xl flex items-center justify-between sticky top-3 z-50">
       {/* Logo */}
       <div className="flex items-center">
         <NavLink to="/">
