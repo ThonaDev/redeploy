@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { FaEye, FaEyeSlash, FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import LoginImage from "../../assets/login.png";
 import JOBCollapLogo from "../../assets/jobCollapLogo.png";
@@ -11,10 +11,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { useLoginMutation } from "../../features/api/apiSlice";
+import { useRegisterMutation, useLoginMutation } from "../../features/api/apiSlice";
 import { setCredentials } from "../../features/auth/authSlide";
 import { useAppDispatch } from "../../store";
-import { storeAccessToken, storeRefreshToken } from "../../utils/tokenUtils";
+import { storeAccessToken, storeRefreshToken, generateSecurePassword, storeSocialPassword } from "../../utils/tokenUtils";
 
 import {
   GithubAuthProvider,
@@ -22,7 +22,6 @@ import {
   signInWithPopup,
   fetchSignInMethodsForEmail,
   signOut,
-  signInWithCredential,
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase-config";
 
@@ -51,10 +50,11 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [login, { isLoading: isSubmitting }] = useLoginMutation();
+  const [registerUser] = useRegisterMutation(); // Renamed to avoid conflict
+  const [login, { isLoading: isSubmitting }] = useLoginMutation(); // Added isLoading as isSubmitting
 
   const {
-    register,
+    register, // From useForm
     handleSubmit,
     formState: { errors },
     reset,
@@ -92,21 +92,43 @@ export default function Login() {
     }
   };
 
-  // Social login
+  // Updated Social login with improved error handling
   const handleSocialLogin = async (providerType) => {
     try {
       setIsSocialLoading(true);
-      await signOut(auth); // Clear previous session
+      await signOut(auth).catch((err) => console.error("Sign out error:", err));
 
       const provider =
         providerType === "github"
           ? new GithubAuthProvider()
           : new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const firebaseUser = result.user;
+      const email = firebaseUser.email;
+      const userName = firebaseUser.displayName || firebaseUser.email.split('@')[0]; // Fallback to email prefix
 
-      console.log(`${providerType} user:`, user);
-      toast.success(`✅ Logged in with ${providerType}`, {
+      // Generate a secure password for the new account
+      const socialPassword = generateSecurePassword();
+      storeSocialPassword(email, socialPassword);
+
+      // Attempt registration for new user
+      const registerPayload = { userName, email, password: socialPassword };
+      const registerResponse = await registerUser(registerPayload).unwrap();
+
+      // If registration succeeds, log in immediately
+      const loginPayload = { email, password: socialPassword };
+      const loginResponse = await login(loginPayload).unwrap();
+
+      dispatch(
+        setCredentials({
+          accessToken: loginResponse.data.accessToken,
+          refreshToken: loginResponse.data.refreshToken,
+        })
+      );
+      storeAccessToken(loginResponse.data.accessToken);
+      storeRefreshToken(loginResponse.data.refreshToken);
+
+      toast.success("✅ Account created and logged in with social!", {
         position: "top-center",
         autoClose: 2500,
       });
@@ -115,22 +137,25 @@ export default function Login() {
       console.error(`${providerType} login error:`, error);
 
       if (error.code === "auth/account-exists-with-different-credential") {
-        const email = error.customData.email;
-        const pendingCred =
-          providerType === "github"
-            ? GithubAuthProvider.credentialFromError(error)
-            : GoogleAuthProvider.credentialFromError(error);
-
+        const email = error.customData?.email;
         const methods = await fetchSignInMethodsForEmail(auth, email);
         toast.error(
-          `Email already exists with ${methods.join(
-            ", "
-          )}. Please login using that provider first.`,
-          {
-            position: "top-center",
-            autoClose: 5000,
-          }
+          `Email already used with ${methods.join(", ")}. Please login with that provider first.`,
+          { position: "top-center", autoClose: 5000 }
         );
+      } else if (error.status === 500) {
+        // Email already existed
+        toast.error(
+          "This email is already registered. Please use normal login with your password.",
+          { position: "top-center", autoClose: 5000 }
+        );
+        navigate("/login");
+      } else if (error.status === 400) {
+        // Password or Email is not valid (unexpected, but handle it)
+        toast.error("🚨 An error occurred during social login. Please try again.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
       } else {
         toast.error(`🚨 ${providerType} login failed`, {
           position: "top-center",
@@ -143,9 +168,9 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-blue-50 px-4">
+    <div className="flex items-center justify-center min-h-screen bg-white px-4">
       <div className="w-full max-w-5xl bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row">
-        {/* Left side */}
+        {/* Left side (unchanged) */}
         <div className="hidden md:flex md:w-1/2 flex-col items-center justify-start bg-[#ECF2FF] p-8 relative">
           <div className="absolute top-6 left-6 flex flex-col items-start">
             <h1 className="text-2xl lg:text-3xl font-bold text-[#1A5276]">
@@ -166,7 +191,7 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Right side */}
+        {/* Right side (form updated with isSubmitting) */}
         <div className="w-full md:w-1/2 flex flex-col justify-center p-6 sm:p-8 lg:p-10 bg-[#ECF2FF]">
           <h2 className="text-2xl sm:text-3xl text-center font-bold text-[#1A5276] mb-6">
             Login
@@ -176,7 +201,7 @@ export default function Login() {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-5 flex flex-col items-center"
           >
-            {/* Email */}
+            {/* Email (unchanged) */}
             <div className="w-full sm:w-11/12">
               <label className="block text-md font-bold text-[#1A5276]">
                 Email
@@ -194,7 +219,7 @@ export default function Login() {
               )}
             </div>
 
-            {/* Password */}
+            {/* Password (unchanged) */}
             <div className="relative w-full sm:w-11/12">
               <label className="block text-md font-bold text-[#1A5276]">
                 Password
@@ -229,7 +254,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Login button */}
+            {/* Login button (fixed with isSubmitting) */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -240,17 +265,17 @@ export default function Login() {
           </form>
 
           <div className="mt-6 text-center w-full">
-            <p className="text-lg mb-3 text-[#1A5276]">Login with</p>
+            <p className="text-lg mb-3 text-[#1A5276]">Or login with</p>
             <div className="flex justify-center space-x-5 text-3xl">
               <FaGithub
-                size={42} // slightly smaller (GitHub icon is visually heavier)
+                size={42}
                 onClick={() => !isSocialLoading && handleSocialLogin("github")}
                 className={`cursor-pointer text-black hover:scale-110 transition ${
                   isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
                 }`}
               />
               <FcGoogle
-                size={48} // slightly larger to balance with GitHub
+                size={48}
                 onClick={() => !isSocialLoading && handleSocialLogin("google")}
                 className={`cursor-pointer hover:scale-110 transition ${
                   isSocialLoading ? "opacity-60 cursor-not-allowed" : ""

@@ -208,9 +208,9 @@ const FindJobPage = () => {
     const jobsToDisplay = isFiltered ? filteredJobs : jobs;
 
     return (
-        <div className="min-h-screen font-sans mx-[105px]">
+        <div className="min-h-screen font-sans mx-[105px] mt-12">
             <header className="mb-8 md:mb-12 text-center">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#1A5276]">Find your dream jobs</h1>
+                <h1 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276]">Find your dream jobs</h1>
             </header>
             <section className="flex flex-col items-center gap-4 mb-10 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
@@ -295,7 +295,7 @@ const FindJobPage = () => {
                 </div>
             )}
             <section className="max-w-7xl mx-auto mb-12">
-                <h2 className="text-3xl sm:text-4xl font-bold text-[#1A5276] text-center mb-8">Latest Jobs</h2>
+                <h2 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276] text-center mb-8">Latest Jobs</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {latestJobs.length > 0 ? (
                         latestJobs.map((job) => (

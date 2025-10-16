@@ -65,3 +65,44 @@ export const clearTokens = () => {
   secureLocalStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
   console.log("Tokens cleared from secure storage.");
 };
+
+// Generate a secure random password
+export const generateSecurePassword = (length = 12) => {
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=";
+  const allChars = uppercase + lowercase + numbers + symbols;
+
+  const getRandomChar = (str) => str.charAt(Math.floor(Math.random() * str.length));
+  
+  let password = 
+    getRandomChar(uppercase) +
+    getRandomChar(lowercase) +
+    getRandomChar(numbers) +
+    getRandomChar(symbols);
+  
+  for (let i = password.length; i < length; i++) {
+    password += getRandomChar(allChars);
+  }
+
+  // Shuffle the password
+  password = password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
+
+  return password;
+};
+
+// Store social password securely
+export const storeSocialPassword = (email, password) => {
+  const key = `socialPassword_${email}`;
+  secureLocalStorage.setItem(key, password);
+};
+
+// Retrieve social password
+export const getSocialPassword = (email) => {
+  const key = `socialPassword_${email}`;
+  return secureLocalStorage.getItem(key);
+};

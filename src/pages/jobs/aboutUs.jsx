@@ -20,19 +20,19 @@ export default function About() {
     }
   };
   return (
-    <section className="absolute top-0 w-full">
+    <section className="">
       {/* ====== About Section ====== */}
-      <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-6 pt-20">
+      <section className="absolute top-0 w-full bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-25 pt-25">
         {/* <NavBar className="mb-16 " /> */}
         <div className="max-w-7xl mx-auto py-10 px-16 grid md:grid-cols-2 gap-24 items-center">
           {/* Left Side: Text */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 font-poppins text-[#FF7A00]">
-              About <span className="text-[#1A5276]">Jobcollap</span>
+            <h1 className="text-4xl md:text-[56px] font-bold mb-8 font-poppins text-[#FF7A00]">
+              About <span className="text-[#1A5276]">JOBcollap</span>
             </h1>
-            <p className="text-lg text-[#1A5276] mb-8 space-y-2">
-              A simple and trusted platform where 
-              freelancers and businesses
+            <p className="text-2xl font-medium text-[#1A5276] mb-10 space-y-2">
+              A simple and trusted platform where <br />
+              freelancers and businesses <br />
               connect and grow
             </p>
             <button onClick={scrollToWhoWeAre} className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
@@ -42,13 +42,13 @@ export default function About() {
 
           {/* Right Side: Image */}
           <div className="flex justify-center">
-            <img src="src/assets/hero.png" alt="About Jobcollap" />
+            <img src="src/assets/hero.png" alt="About Jobcollap" className="w-full h-auto"/>
           </div>
         </div>
       </section>
 
       {/* ====== Who We Are Section ====== */}
-      <section ref={whoWeAreRef} className="bg-[#F5F5F5] py-6">
+      <section ref={whoWeAreRef} className="bg-[#F5F5F5] py-6 mt-143">
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Image */}
           <div className="flex justify-center">

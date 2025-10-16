@@ -1,56 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
-import { FiMapPin } from 'react-icons/fi';
+import { FiMapPin } from "react-icons/fi";
 
-const SingleJobCard = ({ jobTitle, postDate, location, salary, Photos, jobUuid }) => {
-    // Track the bookmark status for this specific card
-    const [isBookmarked, setIsBookmarked] = useState(false); 
-    
-    const photoUrl = Photos && Photos.length > 0 ? Photos[0].url : 'https://via.placeholder.com/400x200';
+const SingleJobCard = ({
+  jobTitle,
+  postDate,
+  location,
+  salary,
+  Photos,
+  jobUuid,
+}) => {
+  // Track the bookmark status for this specific card
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
-    // Function to toggle the bookmark state
-    const handleBookmarkClick = (e) => {
-        e.stopPropagation(); // Prevents card click logic if any
-        setIsBookmarked(!isBookmarked);
-        console.log(`Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`);
-    };
+  const photoUrl =
+    Photos && Photos.length > 0
+      ? Photos[0].url
+      : "https://via.placeholder.com/400x200";
 
-    return (
-        <div className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-none shadow-md overflow-hidden">
-            <div className="relative">
-                <img
-                    src={photoUrl}
-                    alt="Job listing visual"
-                    className="w-full h-48 object-cover p-4 rounded-[20px]"
-                />
-                <button 
-                    aria-label="Bookmark job" 
-                    className="absolute top-5 right-5 bg-white rounded-full p-2 shadow-md"
-                    onClick={handleBookmarkClick} 
-                >
-                    {isBookmarked ? (
-                        <FaBookmark color="#FF7A00" size={24}/>
-                    ) : (
-                        <FaRegBookmark color="#FF7A00" size={24}/>
-                    )}
-                </button>
-            </div>
-            <div className="px-4">
-                <h2 className="text-xl md:text-2xl text-left font-bold text-[#1A5276] mb-2">{jobTitle}</h2>
-                <div className="text-sm text-[#1A5276] mb-2">
-                    <span className="mr-4">Posted: {new Date(postDate).toLocaleDateString()}</span>
-                    <span className="flex items-center"><FiMapPin size={16} className="mr-1" />{location}</span>
-                </div>
-                <hr className="border-t border-gray-200 mb-2" />
-                <div className="flex items-center justify-between pb-4 pt-2">
-                    <span className="text-xl font-bold text-[#1A5276]">{salary}$</span>
-                    <button className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm">
-                        Apply
-                    </button>
-                </div>
-            </div>
-        </div>
+  // Function to toggle the bookmark state
+  const handleBookmarkClick = (e) => {
+    e.stopPropagation(); // Prevents card click logic if any
+    setIsBookmarked(!isBookmarked);
+    console.log(
+      `Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`
     );
+  };
+
+  return (
+    <div
+      className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-md overflow-hidden
+                      transition-all duration-300 ease-in-out 
+                      outline-gray-200 hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2"
+    >
+      <div className="relative">
+        <img
+          src={photoUrl}
+          alt="Job listing visual"
+          className="w-full h-48 object-cover p-4 rounded-[20px]"
+        />
+        <button
+          aria-label="Bookmark job"
+          className="absolute top-5 right-5 bg-white rounded-full p-2 shadow-md"
+          onClick={handleBookmarkClick}
+        >
+          {isBookmarked ? (
+            <FaBookmark color="#FF7A00" size={24} />
+          ) : (
+            <FaRegBookmark color="#FF7A00" size={24} />
+          )}
+        </button>
+      </div>
+      <div className="px-4">
+        <h2 className="text-xl md:text-xl text-left font-bold text-[#1A5276] mb-2">
+          {jobTitle}
+        </h2>
+        <div className="text-sm text-[#1A5276] mb-2">
+          <span className="mr-4">
+            Posted: {new Date(postDate).toLocaleDateString()}
+          </span>
+          <span className="flex items-center">
+            <FiMapPin size={16} className="mr-1" />
+            {location}
+          </span>
+        </div>
+        <hr className="border-t border-gray-200 mb-2" />
+        <div className="flex items-center justify-between pb-4 pt-2">
+          <span className="text-xl font-semibold text-[#1A5276]">
+            {salary}$
+          </span>
+          <button className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm">
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default SingleJobCard;
