@@ -4,11 +4,11 @@ import NavBar from "../../components/layouts/navbar-afterLogin";
 
 const Herosection = () => {
   return (
-    <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-4 pt-20 px-6 sm:px-12 md:px-24 lg:px-32 xl:px-40 absolute top-0">
+    <section className="bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-21 pt-21 px-6 sm:px-12 md:px-24 lg:px-32 xl:px-40 absolute top-0 w-full">
       {/* <NavBar className="mb-16" /> */}
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center pt-16">
         {/* Left Content */}
-        <div className="space-y-6 text-center md:text-left">
+        <div className="space-y-10 text-center md:text-left">
           <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-poppins font-bold leading-snug md:leading-tight text-[#1A5276]">
             The Bridge Between <br />
             Talent, <span className="text-[#FF7A00]">Work and Growth</span>

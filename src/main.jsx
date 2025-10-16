@@ -17,6 +17,7 @@ import About from "./pages/jobs/aboutUs";
 import ContactUs from "./pages/jobs/contactUs";
 import Profile from "./pages/jobs/profile-details";
 import Mysavedjobs from "./pages/jobs/mysaved-job";
+import Homepage from "./pages/jobs/homepage";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -24,7 +25,7 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <Routes>
           <Route element={<RootLayout />}>
-            <Route path="/" element={<App />} />
+            <Route path="/" element={<Homepage />} />
             {/* sunnich */}
             <Route path="/jobs" element={<FindJobPage />} />
             <Route path="/about" element={<About />} />

@@ -20,7 +20,7 @@ export default function About() {
     }
   };
   return (
-    <section className="">
+    <section className="mb-20">
       {/* ====== About Section ====== */}
       <section className="absolute top-0 w-full bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-25 pt-25">
         {/* <NavBar className="mb-16 " /> */}
@@ -108,7 +108,7 @@ export default function About() {
       </section>
 
       {/* ====== Mentors & Teams Section ====== */}
-      <div className="flex flex-col items-center py-16 bg-[#F5F5F5]">
+      <div className="flex flex-col items-center  bg-[#F5F5F5]">
         {/* Mentors Section */}
         <section className="w-full max-w-6xl mb-16">
           <h1 className="text-3xl font-bold text-center mb-16 font-poppins text-[#1A5276]">
