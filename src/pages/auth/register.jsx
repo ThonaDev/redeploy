@@ -7,18 +7,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RegisterImage from "../../assets/register.png";
 import JOBCollapLogo from "../../assets/jobCollapLogo.png";
-
-// Validation libraries
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-
-// Redux and API integrations
 import { useRegisterMutation, useLoginMutation } from "../../features/api/apiSlice";
 import { setCredentials } from "../../features/auth/authSlide";
 import { useAppDispatch } from "../../store";
-import { storeAccessToken, storeRefreshToken, generateSecurePassword, storeSocialPassword } from "../../utils/tokenUtils";
-
+import { storeAccessToken, storeRefreshToken, generateSecurePassword } from "../../utils/tokenUtils";
 import {
   GithubAuthProvider,
   GoogleAuthProvider,
@@ -28,12 +23,9 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase-config";
 
-// Password regex
-const strongPasswordRegex = new RegExp(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/
-);
+const strongPasswordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
-// Zod schema for validation
 const registerSchema = z
   .object({
     userName: z
@@ -43,14 +35,14 @@ const registerSchema = z
     email: z
       .string()
       .nonempty("Please fill out this field")
-      .email("Please include '@' in the email address (e.g., user@domain.com)"),
+      .email("Please include '@' in the email address"),
     password: z
       .string()
       .nonempty("Password is required")
       .min(8, "Password must be at least 8 characters long")
       .regex(
         strongPasswordRegex,
-        "Password must include an uppercase letter, a lowercase letter, a number, and a symbol (e.g., Sokeang@1234)"
+        "Password must include an uppercase letter, a lowercase letter, a number, and a symbol"
       ),
     confirmPassword: z.string().nonempty("Confirm password is required"),
   })
@@ -59,7 +51,6 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
-// Error Boundary Component
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
 
@@ -85,12 +76,11 @@ export default function Register() {
   const [isSocialLoading, setIsSocialLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  const [registerUser, { isLoading }] = useRegisterMutation(); // Added isLoading
+  const [registerUser, { isLoading }] = useRegisterMutation();
   const [login] = useLoginMutation();
 
   const {
-    register, // From useForm
+    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -104,24 +94,33 @@ export default function Register() {
     },
   });
 
-  // Form submission handler (manual register)
   const onSubmit = async (data) => {
     try {
       const { userName, email, password } = data;
       const result = await registerUser({ userName, email, password }).unwrap();
-      console.log("✅ Registered:", result);
-
-      if (result?.token) {
-        localStorage.setItem("accessToken", result.token);
+      if (result?.data?.accessToken) {
+        storeAccessToken(result.data.accessToken);
+        storeRefreshToken(result.data.refreshToken);
+        dispatch(
+          setCredentials({
+            accessToken: result.data.accessToken,
+            refreshToken: result.data.refreshToken,
+            user: { userName, email },
+          })
+        );
+        toast.success("🎉 Registered and logged in successfully!", {
+          position: "top-center",
+          autoClose: 2500,
+        });
+        navigate("/");
+      } else {
+        toast.success(
+          "User registered successfully. Please check your email to verify your account.",
+          { position: "top-center", autoClose: 5000 }
+        );
+        navigate("/login");
       }
-
-      toast.success(
-        "User registered successfully. Please check your email to verify your account.",
-        { position: "top-center", autoClose: 5000 }
-      );
-
       reset();
-      localStorage.setItem("redirectToLogin", "true");
     } catch (err) {
       console.error("❌ Registration failed:", err);
       toast.error(
@@ -134,31 +133,21 @@ export default function Register() {
     }
   };
 
-  // Updated Social login with improved error handling
   const handleSocialLogin = async (providerType) => {
     try {
       setIsSocialLoading(true);
-      await signOut(auth).catch((err) => console.error("Sign out error:", err));
-
+      await signOut(auth);
       const provider =
         providerType === "github"
           ? new GithubAuthProvider()
           : new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const firebaseUser = result.user;
-      const email = firebaseUser.email;
-      const userName = firebaseUser.displayName || firebaseUser.email.split('@')[0]; // Fallback to email prefix
-
-      // Generate a secure password for the new account
+      const { email, displayName } = result.user;
+      const userName = displayName || email.split("@")[0];
       const socialPassword = generateSecurePassword();
-      console.log("password: ", socialPassword);
-      storeSocialPassword(email, socialPassword);
 
-      // Attempt registration for new user
       const registerPayload = { userName, email, password: socialPassword };
-      const registerResponse = await registerUser(registerPayload).unwrap();
-
-      // If registration succeeds, log in immediately
+      await registerUser(registerPayload).unwrap();
       const loginPayload = { email, password: socialPassword };
       const loginResponse = await login(loginPayload).unwrap();
 
@@ -166,39 +155,32 @@ export default function Register() {
         setCredentials({
           accessToken: loginResponse.data.accessToken,
           refreshToken: loginResponse.data.refreshToken,
+          user: { userName, email },
         })
       );
       storeAccessToken(loginResponse.data.accessToken);
       storeRefreshToken(loginResponse.data.refreshToken);
 
-      toast.success("✅ Account created and logged in with social!", {
+      toast.success("✅ Account created and logged in!", {
         position: "top-center",
         autoClose: 2500,
       });
       navigate("/");
     } catch (error) {
       console.error(`${providerType} login error:`, error);
-
       if (error.code === "auth/account-exists-with-different-credential") {
         const email = error.customData?.email;
         const methods = await fetchSignInMethodsForEmail(auth, email);
         toast.error(
-          `Email already used with ${methods.join(", ")}. Please login with that provider first.`,
+          `Email already used with ${methods.join(", ")}. Please login with that provider.`,
           { position: "top-center", autoClose: 5000 }
         );
-      } else if (error.status === 500) {
-        // Email already existed
+      } else if (error?.data?.status === 500) {
         toast.error(
-          "This email is already registered. Please use normal login with your password.",
+          "This email is already registered. Please use normal login.",
           { position: "top-center", autoClose: 5000 }
         );
         navigate("/login");
-      } else if (error.status === 400) {
-        // Password or Email is not valid (unexpected, but handle it)
-        toast.error("🚨 An error occurred during social login. Please try again.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
       } else {
         toast.error(`🚨 ${providerType} login failed`, {
           position: "top-center",
@@ -214,7 +196,6 @@ export default function Register() {
     <ErrorBoundary>
       <div className="flex items-center justify-center min-h-screen bg-white px-4">
         <div className="w-full max-w-5xl bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row">
-          {/* Left side */}
           <div className="hidden md:flex md:w-1/2 flex-col items-center justify-start bg-[#ECF2FF] p-8 relative">
             <div className="absolute top-6 left-6 flex flex-col items-start">
               <h1 className="text-2xl lg:text-3xl font-bold text-[#1A5276]">
@@ -235,7 +216,6 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Right side */}
           <div className="w-full md:w-1/2 flex flex-col justify-center p-6 sm:p-8 lg:p-10 bg-[#ECF2FF]">
             <h2 className="text-2xl sm:text-3xl text-center font-bold text-[#1A5276] mb-6">
               Register
@@ -245,7 +225,6 @@ export default function Register() {
               onSubmit={handleSubmit(onSubmit)}
               className="space-y-5 flex flex-col items-center"
             >
-              {/* Username */}
               <div className="w-full sm:w-11/12">
                 <label className="block text-md font-bold text-[#1A5276]">
                   Username
@@ -263,7 +242,6 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Email */}
               <div className="w-full sm:w-11/12">
                 <label className="block text-md font-bold text-[#1A5276]">
                   Email
@@ -281,7 +259,6 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Password */}
               <div className="relative w-full sm:w-11/12">
                 <label className="block text-md font-bold text-[#1A5276]">
                   Password
@@ -306,7 +283,6 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Confirm Password */}
               <div className="relative w-full sm:w-11/12">
                 <label className="block text-md font-bold text-[#1A5276]">
                   Confirm Password
@@ -331,7 +307,6 @@ export default function Register() {
                 )}
               </div>
 
-              {/* Register button (fixed with isLoading) */}
               <button
                 type="submit"
                 disabled={isLoading}

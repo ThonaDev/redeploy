@@ -1,20 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { getDecryptedAccessToken, getDecryptedRefreshToken } from "../../utils/tokenUtils";
 
-// Redux Slice for Auth State Management
 export const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null, // Optional: Store user data after login (e.g., { id, email, name })
-    accessToken: null,
-    refreshToken: null,
-    isAuthenticated: false,
+    user: null,
+    accessToken: getDecryptedAccessToken() || null,
+    refreshToken: getDecryptedRefreshToken() || null,
+    isAuthenticated: !!getDecryptedAccessToken(),
   },
   reducers: {
     setCredentials: (state, action) => {
       const { accessToken, refreshToken, user } = action.payload;
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
-      state.user = user || null; // If server returns user info, store it
+      state.user = user || null;
       state.isAuthenticated = !!accessToken;
     },
     clearCredentials: (state) => {
@@ -23,9 +23,8 @@ export const authSlice = createSlice({
       state.refreshToken = null;
       state.isAuthenticated = false;
     },
-    // Optional: Add more reducers, e.g., for logout or user updates
   },
 });
 
 export const { setCredentials, clearCredentials } = authSlice.actions;
-//export default authSlice.reducer;
+export default authSlice.reducer;

@@ -1,29 +1,62 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getDecryptedAccessToken } from "../../utils/tokenUtils";
+import { getDecryptedAccessToken, getDecryptedRefreshToken, storeAccessToken, storeRefreshToken, clearTokens } from "../../utils/tokenUtils";
+import { setCredentials, clearCredentials } from "../auth/authSlide";
 
-// custom fetchBaseQuery to handle the base URL
 const baseQueryCustom = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BASE_URL,
   prepareHeaders: (headers) => {
     const accessToken = getDecryptedAccessToken();
-
     if (accessToken) {
-      headers.set("Authorization", accessToken);
+      headers.set("Authorization", `Bearer ${accessToken}`);
     }
-
     return headers;
   },
 });
 
-// Define a service using a base URL and expected endpoints
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQueryCustom(args, api, extraOptions);
+
+  if (result.error?.status === 401) {
+    const refreshToken = getDecryptedRefreshToken();
+    if (refreshToken) {
+      try {
+        const refreshResult = await baseQueryCustom(
+          {
+            url: "/auth/refresh-token",
+            method: "POST",
+            body: { refreshToken },
+          },
+          api,
+          extraOptions
+        );
+
+        if (refreshResult.data) {
+          const { accessToken, refreshToken: newRefreshToken } = refreshResult.data.data;
+          storeAccessToken(accessToken);
+          storeRefreshToken(newRefreshToken);
+          api.dispatch(setCredentials({ accessToken, refreshToken: newRefreshToken }));
+          result = await baseQueryCustom(args, api, extraOptions);
+        } else {
+          api.dispatch(clearCredentials());
+          clearTokens();
+        }
+      } catch (error) {
+        api.dispatch(clearCredentials());
+        clearTokens();
+      }
+    }
+  }
+
+  return result;
+};
+
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
-  baseQuery: baseQueryCustom,
-  tagTypes: ["User"], // Optional: Add tag types if you plan to use invalidations later (e.g., for logout or profile updates)
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ["User"],
   endpoints: (build) => ({}),
 });
 
-// Inject all auth endpoints here (consolidated to avoid duplication)
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -47,8 +80,22 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    getUser: builder.query({
+      query: () => ({
+        url: "/users/me",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    }),
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: "/auth/refresh-token",
+        method: "POST",
+        body: { refreshToken: getDecryptedRefreshToken() },
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetUserQuery, useRefreshTokenMutation } = authApi;
