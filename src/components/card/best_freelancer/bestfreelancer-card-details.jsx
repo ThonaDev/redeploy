@@ -8,42 +8,7 @@ import { LuPhone, LuMail } from "react-icons/lu";
 import { VscGithub } from "react-icons/vsc";
 import { TiSocialLinkedinCircular } from "react-icons/ti";
 import { RiTelegramLine } from "react-icons/ri";
-import Thona from "../../../assets/Thona.jpg";
-import Sunnich from "../../../assets/Sunnich.jpg";
-
-// ✅ Freelancer data
-const freelancers = [
-  {
-    id: 1,
-    name: "Ben Thona",
-    role: "Full-Stack Developer",
-    avatar: Thona,
-    birth: "14 June, 2000",
-    gender: "Male",
-    website: "www.jobcollap.com",
-    location: "Phnom Penh, Cambodia",
-    phone: "096 6666 7777",
-    email: "jobcollap@gmail.com",
-    bio: `I've been passionate about programming and building things from an early age,
-    with a keen interest in both the user-facing and server-side aspects of web applications.
-    My expertise lies in the MERN stack (MongoDB, Express.js, React, Node.js).`,
-  },
-  {
-    id: 2,
-    name: "Phorn Sunnich",
-    role: "Product Designer",
-    avatar: Sunnich,
-    birth: "23 December, 1999",
-    gender: "Female",
-    website: "www.designcollap.com",
-    location: "Phnom Penh, Cambodia",
-    phone: "097 1234 5678",
-    email: "sunnich.design@gmail.com",
-    bio: `As a passionate product designer, I specialize in creating clean, user-friendly,
-    and visually appealing interfaces. My focus is on understanding user behavior
-    to deliver functional and delightful designs.`,
-  },
-];
+import { freelancers } from "./freelancers";
 
 export default function FreelancerDetail() {
   const { id } = useParams();

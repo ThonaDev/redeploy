@@ -1,38 +1,9 @@
 import React from "react";
 import { MdVerified, MdLocationOn } from "react-icons/md";
+import { NavLink } from "react-router-dom";
+import { freelancers } from "./freelancers";
 
-import Thona from "../../../assets/Thona.jpg";
-import Sunnich from "../../../assets/Sunnich.jpg";
-import { id } from "zod/v4/locales";
-import { NavLink } from "react-router";
-
-// ✅ Freelancer data
-const freelancers = [
-  {
-    id: 1,
-    name: "Ben Thona",
-    role: "Full-Stack Developer",
-    rate: 190,
-    location: "Phnom Penh, PP",
-    tags: ["Web", "Mobile", "PHP"],
-    avatar: Thona,
-    verified: true,
-    roleColor: "bg-blue-100 text-blue-800",
-  },
-  {
-    id: 2,
-    name: "Phorn Sunnich",
-    role: "Product Designer",
-    rate: 170,
-    location: "Phnom Penh, PP",
-    tags: ["Web", "Figma", "Wireframing"],
-    avatar: Sunnich,
-    verified: true,
-    roleColor: "bg-purple-100 text-purple-800",
-  },
-];
-
-// ✅ Tag colors
+// Tag colors
 const tagColors = {
   Web: "bg-green-50 text-green-600",
   Mobile: "bg-red-50 text-red-500",
@@ -41,7 +12,7 @@ const tagColors = {
   Wireframing: "bg-pink-50 text-pink-500",
 };
 
-// ✅ Reusable Freelancer Card (with safety check)
+// Reusable Freelancer Card
 const BestFreelancerCard = ({ freelancer }) => {
   if (!freelancer) {
     console.warn("⚠️ Missing freelancer data for BestFreelancerCard");
@@ -49,7 +20,7 @@ const BestFreelancerCard = ({ freelancer }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-8 flex items-center max-w-7xl hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2 transition-all duration-300 ease-in-out ">
+    <div className="bg-white rounded-2xl p-8 flex items-center max-w-7xl hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2 transition-all duration-300 ease-in-out">
       {/* Left Side: Avatar + Button */}
       <div className="flex flex-col items-center w-32">
         <img
@@ -57,7 +28,11 @@ const BestFreelancerCard = ({ freelancer }) => {
           alt={freelancer.name}
           className="w-20 h-20 rounded-full object-cover mb-4"
         />
-        <NavLink to={`/freelancer/${id}`} className="cursor-pointer bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">
+        <NavLink
+          to={`/freelancer/${freelancer.id}`}
+          aria-label={`View profile of ${freelancer.name}`}
+          className="cursor-pointer bg-gray-50 text-gray-700 font-medium px-5 py-2.5 rounded-lg hover:bg-gray-100 transition-colors"
+        >
           View Profile
         </NavLink>
       </div>
@@ -110,18 +85,18 @@ const BestFreelancerCard = ({ freelancer }) => {
   );
 };
 
-// ✅ Main Component to Render All Cards
+// Main Component to Render All Cards
 export default function BestFreelancers() {
   return (
     <section className="mb-15">
       <header className="text-center mb-12">
         <h1 className="text-3xl md:text-[32px] font-semibold text-[#1A5276]">
-          Our best freelancer
+          Our Best Freelancers
         </h1>
       </header>
-      <div className="max-w-5xl mx-auto px-4 grid sm:grid-cols-1 md:grid-cols-2 gap-6 font-poppins ">
-        {freelancers.map((freelancer, index) => (
-          <BestFreelancerCard key={index} freelancer={freelancer} />
+      <div className="max-w-5xl mx-auto px-4 grid sm:grid-cols-1 md:grid-cols-2 gap-6 font-poppins">
+        {freelancers.map((freelancer) => (
+          <BestFreelancerCard key={freelancer.id} freelancer={freelancer} />
         ))}
       </div>
     </section>
