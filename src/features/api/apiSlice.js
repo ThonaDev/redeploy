@@ -41,9 +41,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
           clearTokens();
         }
       } catch (error) {
+        console.error("Refresh token error:", error);
         api.dispatch(clearCredentials());
         clearTokens();
       }
+    } else {
+      api.dispatch(clearCredentials());
+      clearTokens();
     }
   }
 
@@ -85,7 +89,16 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/users/me",
         method: "GET",
       }),
+      transformResponse: (response) => response.data,
       providesTags: ["User"],
+      onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials({ user: { name: data.name, email: data.email } }));
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+        }
+      },
     }),
     refreshToken: builder.mutation({
       query: () => ({

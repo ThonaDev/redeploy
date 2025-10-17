@@ -95,10 +95,10 @@ export default function Login() {
           : new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const { email, displayName } = result.user;
-      const userName = displayName || email.split("@")[0];
+      const name = displayName || email.split("@")[0];
       const socialPassword = generateSecurePassword();
 
-      const registerPayload = { userName, email, password: socialPassword };
+      const registerPayload = { name, email, password: socialPassword };
       await registerUser(registerPayload).unwrap();
       const loginPayload = { email, password: socialPassword };
       const loginResponse = await login(loginPayload).unwrap();
@@ -107,7 +107,7 @@ export default function Login() {
         setCredentials({
           accessToken: loginResponse.data.accessToken,
           refreshToken: loginResponse.data.refreshToken,
-          user: { userName, email },
+          user: { name, email },
         })
       );
       storeAccessToken(loginResponse.data.accessToken);
@@ -182,7 +182,7 @@ export default function Login() {
               </label>
               <input
                 type="email"
-                placeholder="jobcollab123@gmail.com"
+                placeholder="phartphea854@gmail.com"
                 {...register("email")}
                 className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
               />
@@ -208,7 +208,7 @@ export default function Login() {
                 className="absolute top-10 right-3 text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                {showPassword ? <FaEye size={18} /> : <FaEyeSlash  size={18} />}
               </button>
               {errors.password && (
                 <p className="text-red-600 text-sm mt-1">

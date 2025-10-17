@@ -11,7 +11,7 @@ import {
 } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { clearCredentials } from "../../features/auth/authSlide";
 import { useLogoutMutation } from "../../features/api/apiSlice";
 import { clearTokens } from "../../utils/tokenUtils";
@@ -29,13 +29,13 @@ const NavBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const username = user?.name || "My Profile"; // Fallback to "My Profile"
 
-  const menuItems = [
-    { name: "Home", path: "/" },
-    { name: "Find Jobs", path: "/jobs" },
-    { name: "About Us", path: "/about" },
-    { name: "Contact Us", path: "/contact" },
-  ];
+  // Debug logging to inspect user state
+  useEffect(() => {
+    console.log("NavBar user state:", { user, isAuthenticated });
+  }, [user, isAuthenticated]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -81,7 +81,7 @@ const NavBar = () => {
       <div className="flex items-center">
         <NavLink to="/">
           <img
-            src="src/assets/Logo.jpg"
+            src="src/assets/jobCollapLogo.png"
             alt="JOBCOLLAP Logo"
             className="h-10 md:h-12 mr-4 object-contain"
           />
@@ -89,7 +89,12 @@ const NavBar = () => {
       </div>
 
       <div className="hidden lg:flex space-x-8 text-gray-700 font-medium">
-        {menuItems.map((item) => (
+        {[
+          { name: "Home", path: "/" },
+          { name: "Find Jobs", path: "/jobs" },
+          { name: "About Us", path: "/about" },
+          { name: "Contact Us", path: "/contact" },
+        ].map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
@@ -150,7 +155,7 @@ const NavBar = () => {
                 }
                 onClick={() => setProfileOpen(false)}
               >
-                <CgProfile className="mr-3" size={20} /> My Profile
+                <FiUser className="mr-3" size={20} /> {username}
               </NavLink>
               <hr />
               <NavLink
@@ -190,7 +195,12 @@ const NavBar = () => {
         }`}
       >
         <div className="flex flex-col space-y-4 p-6 text-[#1A5276] font-medium">
-          {menuItems.map((item) => (
+          {[
+            { name: "Home", path: "/" },
+            { name: "Find Jobs", path: "/jobs" },
+            { name: "About Us", path: "/about" },
+            { name: "Contact Us", path: "/contact" },
+          ].map((item) => (
             <NavLink
               key={item.name}
               to={item.path}
@@ -223,7 +233,7 @@ const NavBar = () => {
                 : "flex items-center px-2 text-[#1A5276] hover:text-[#FF7A00] transition-colors"
             }
           >
-            <CgProfile className="mr-3" size={20} /> My Profile
+            <CgProfile className="mr-3" size={20} /> {username}
           </NavLink>
           <NavLink
             to="/saved-jobs"

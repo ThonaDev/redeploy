@@ -28,10 +28,10 @@ const strongPasswordRegex =
 
 const registerSchema = z
   .object({
-    userName: z
+    name: z
       .string()
       .nonempty("Please fill out this field")
-      .min(3, "Username must be at least 3 characters"),
+      .min(3, "Name must be at least 3 characters"),
     email: z
       .string()
       .nonempty("Please fill out this field")
@@ -87,7 +87,7 @@ export default function Register() {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      userName: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -96,8 +96,8 @@ export default function Register() {
 
   const onSubmit = async (data) => {
     try {
-      const { userName, email, password } = data;
-      const result = await registerUser({ userName, email, password }).unwrap();
+      const { name, email, password } = data;
+      const result = await registerUser({ name, email, password }).unwrap();
       if (result?.data?.accessToken) {
         storeAccessToken(result.data.accessToken);
         storeRefreshToken(result.data.refreshToken);
@@ -105,7 +105,7 @@ export default function Register() {
           setCredentials({
             accessToken: result.data.accessToken,
             refreshToken: result.data.refreshToken,
-            user: { userName, email },
+            user: { name, email },
           })
         );
         toast.success("🎉 Registered and logged in successfully!", {
@@ -143,10 +143,10 @@ export default function Register() {
           : new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const { email, displayName } = result.user;
-      const userName = displayName || email.split("@")[0];
+      const name = displayName || email.split("@")[0];
       const socialPassword = generateSecurePassword();
 
-      const registerPayload = { userName, email, password: socialPassword };
+      const registerPayload = { name, email, password: socialPassword };
       await registerUser(registerPayload).unwrap();
       const loginPayload = { email, password: socialPassword };
       const loginResponse = await login(loginPayload).unwrap();
@@ -155,7 +155,7 @@ export default function Register() {
         setCredentials({
           accessToken: loginResponse.data.accessToken,
           refreshToken: loginResponse.data.refreshToken,
-          user: { userName, email },
+          user: { name, email },
         })
       );
       storeAccessToken(loginResponse.data.accessToken);
@@ -227,17 +227,17 @@ export default function Register() {
             >
               <div className="w-full sm:w-11/12">
                 <label className="block text-md font-bold text-[#1A5276]">
-                  Username
+                  Name
                 </label>
                 <input
                   type="text"
-                  placeholder="Sokkeang"
-                  {...register("userName")}
+                  placeholder="Phat Phea"
+                  {...register("name")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />
-                {errors.userName && (
+                {errors.name && (
                   <p className="text-red-600 text-sm mt-1">
-                    {errors.userName.message}
+                    {errors.name.message}
                   </p>
                 )}
               </div>
@@ -248,7 +248,7 @@ export default function Register() {
                 </label>
                 <input
                   type="email"
-                  placeholder="Sokkeang123@gmail.com"
+                  placeholder="phartphea854@gmail.com"
                   {...register("email")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />
@@ -265,7 +265,7 @@ export default function Register() {
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Sok1234#!"
+                  placeholder="Phat1234#!"
                   {...register("password")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />
@@ -289,7 +289,7 @@ export default function Register() {
                 </label>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Sok1234#!"
+                  placeholder="Phat1234#!"
                   {...register("confirmPassword")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
                 />

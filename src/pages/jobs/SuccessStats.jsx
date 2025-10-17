@@ -6,8 +6,9 @@ const SuccessStats = () => {
   // New Text Color: text-[#1A5276]
   // New Divider Color: bg-[#1A5276]
   return (
-    <div className="mx-[160px] mt-10 mb-15">
-      <div className="relative overflow-hidden md:py-20 rounded-xl text-center bg-gradient-to-tr from-[#e6f7ff] via-[#f0f9ff] to-[#d9f0ff] ">
+    <div className="mx-[170px] mt-10 mb-15">
+      <div className="relative overflow-hidden md:py-20 rounded-xl text-center bg-gradient-to-tr from-[#a0dfff] via-[#a1dffe] to-[#afe4ff]
+ ">
         {/* Subtle diagonal overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-transparent to-blue-50/40 opacity-70 z-0"></div>
 

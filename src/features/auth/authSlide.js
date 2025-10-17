@@ -1,21 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getDecryptedAccessToken, getDecryptedRefreshToken } from "../../utils/tokenUtils";
 
+const initialState = {
+  user: null,
+  accessToken: getDecryptedAccessToken() || null,
+  refreshToken: getDecryptedRefreshToken() || null,
+  isAuthenticated: !!getDecryptedAccessToken(),
+};
+
 export const authSlice = createSlice({
   name: "auth",
-  initialState: {
-    user: null,
-    accessToken: getDecryptedAccessToken() || null,
-    refreshToken: getDecryptedRefreshToken() || null,
-    isAuthenticated: !!getDecryptedAccessToken(),
-  },
+  initialState,
   reducers: {
     setCredentials: (state, action) => {
       const { accessToken, refreshToken, user } = action.payload;
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
-      state.user = user || null;
-      state.isAuthenticated = !!accessToken;
+      state.accessToken = accessToken || state.accessToken;
+      state.refreshToken = refreshToken || state.refreshToken;
+      state.user = user || state.user;
+      state.isAuthenticated = !!accessToken || state.isAuthenticated;
     },
     clearCredentials: (state) => {
       state.user = null;

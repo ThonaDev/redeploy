@@ -8,9 +8,20 @@ import { useGetUserQuery } from "../../features/api/apiSlice";
 
 export default function RootLayout() {
   const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
-  const { isError } = useGetUserQuery(undefined, { skip: !accessToken });
+  const { isLoading, isError, isSuccess } = useGetUserQuery(undefined, {
+    skip: !accessToken || !isAuthenticated,
+  });
 
-  const isLoggedIn = isAuthenticated && !isError;
+  // Debug logging
+  console.log("RootLayout state:", { isAuthenticated, accessToken, isLoading, isError, isSuccess });
+
+  // Show loading state while fetching user data
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // Render NavBar if authenticated and user fetch is successful, otherwise Nav
+  const isLoggedIn = isAuthenticated && accessToken && isSuccess && !isError;
 
   return (
     <div className="bg-[#f5f5f5]">

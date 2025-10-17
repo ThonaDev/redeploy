@@ -17,6 +17,7 @@ import Homepage from "./pages/jobs/homepage";
 import ApplyJob from "./pages/jobs/applying-page";
 import JobDetail from "./pages/jobs/job-details-page";
 import { StrictMode } from "react";
+import FreeLancerDetail from "./components/card/best_freelancer/bestfreelancer-card-details";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -31,12 +32,14 @@ createRoot(document.getElementById("root")).render(
             <Route path="/profile" element={<Profile />} />
             <Route path="/saved-jobs" element={<Mysavedjobs />} />
             <Route path="/job-details/:jobUuid" element={<JobDetail />} />
+            <Route path="/freelancer/:id" element={<FreeLancerDetail />} />
           </Route>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/apply" element={<ApplyJob />} />
+
         </Routes>
       </BrowserRouter>
     </Provider>

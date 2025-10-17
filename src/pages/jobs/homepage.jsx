@@ -9,6 +9,7 @@ import BenefitsData from "./benefitsData";
 import Testimonial from "./testimonial";
 import Client from "./client";
 import SuccessStats from "./SuccessStats";
+import BestFreelancers from "../../components/card/best_freelancer/single-bestfreelancer-card";
 
 const Homepage = () => {
   return (
@@ -18,6 +19,7 @@ const Homepage = () => {
       <FeatureJob/>
       <BenefitsData/>
       <Testimonial/>
+      <BestFreelancers/>
       <Client/>
       <SuccessStats/>
     </section>
