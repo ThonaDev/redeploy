@@ -18,6 +18,8 @@ import ContactUs from "./pages/jobs/contactUs";
 import Profile from "./pages/jobs/profile-details";
 import Mysavedjobs from "./pages/jobs/mysaved-job";
 import Homepage from "./pages/jobs/homepage";
+import ApplyJob from "./pages/jobs/applying-page";
+import JobDetail from "./pages/jobs/job-details-page";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -32,11 +34,14 @@ createRoot(document.getElementById("root")).render(
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/saved-jobs" element={<Mysavedjobs />} />
+             <Route path="/job-details/:jobUuid" element={<JobDetail />} />
           </Route>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/apply" element={<ApplyJob />} />
+         
         </Routes>
       </BrowserRouter>
     </Provider>

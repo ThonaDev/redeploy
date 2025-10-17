@@ -6,6 +6,9 @@ import FindJobPage from "./find-job-page";
 import ThreeStepCard from "./stepcard";
 import FeatureJob from "./featureJob";
 import BenefitsData from "./benefitsData";
+import Testimonial from "./testimonial";
+import Client from "./client";
+import SuccessStats from "./SuccessStats";
 
 const Homepage = () => {
   return (
@@ -14,6 +17,9 @@ const Homepage = () => {
       <ThreeStepCard/>
       <FeatureJob/>
       <BenefitsData/>
+      <Testimonial/>
+      <Client/>
+      <SuccessStats/>
     </section>
   );
 };

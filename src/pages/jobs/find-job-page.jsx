@@ -237,7 +237,7 @@ const FindJobPage = () => {
                 </div>
             </section>
             <section className="max-w-7xl mx-auto mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer">
                     {jobsToDisplay.length > 0 ? (
                         jobsToDisplay.map((job) => (
                             <SingleJobCard
@@ -296,7 +296,7 @@ const FindJobPage = () => {
             )}
             <section className="max-w-7xl mx-auto mb-12">
                 <h2 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276] text-center mb-8">Latest Jobs</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer">
                     {latestJobs.length > 0 ? (
                         latestJobs.map((job) => (
                             <SingleJobCard

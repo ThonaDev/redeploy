@@ -7,7 +7,7 @@ import { NavLink } from "react-router";
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="text-center py-4 text-red-600">
+        <div className="text-center py-10 text-red-600 text-lg font-medium">
           Something went wrong. Please try again later.
         </div>
       );
@@ -28,35 +28,46 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function FeatureJob() {
-  // Fetch the latest jobs with logging to debug structure
   const { data, isLoading, isError, error } = useGetLatestJobsQuery();
 
-  // Debug the data structure
   console.log("API Response:", data);
 
-  // Adjust based on API response (jobs are in data.content)
-  const latestJobs = data?.data?.content || []; // Safely access content array, default to empty array
+  // Ensure safe access to job list
+  const latestJobs = data?.data?.content || [];
 
+  // --- Loading State ---
   if (isLoading)
-    return <div className="text-center py-4">Loading featured jobs...</div>;
+    return (
+      <div className="text-center py-10 text-[#1A5276] font-medium text-lg">
+        Loading featured jobs...
+      </div>
+    );
+
+  // --- Error State ---
   if (isError)
     return (
-      <div className="text-center py-4 text-red-600">
+      <div className="text-center py-10 text-red-600 text-lg font-medium">
         Error loading featured jobs.{" "}
         {error?.data?.message || "Please try again later."}
       </div>
     );
 
+  // --- Main Section ---
   return (
     <ErrorBoundary>
-      <section className="max-w-7xl mx-auto mb-12">
+      <section className="max-w-7xl mx-auto mb-16 px-4 font-poppins">
+        {/* Title */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276] mb-2">
+          <h2 className="text-3xl md:text-[32px] font-semibold text-[#1A5276] mb-2">
             Featured Jobs
           </h2>
-          <p className="text-lg text-[#1A5276]">Freshly released job applications</p>
+          <p className="text-lg text-[#1A5276]">
+            Freshly released job applications
+          </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {/* Jobs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 place-items-center cursor-pointer">
           {latestJobs.length > 0 ? (
             latestJobs.map((job) => (
               <SingleJobCard
@@ -66,19 +77,21 @@ export default function FeatureJob() {
                 postDate={job.createdDate}
                 location={job.location}
                 salary={job.salary}
-                Photos={job.jobPhotos || []} // Added default empty array to prevent errors
+                Photos={job.jobPhotos || []}
               />
             ))
           ) : (
-            <p className="text-center text-[#1A5276] col-span-full">
+            <p className="text-center text-[#1A5276] col-span-full text-lg font-medium">
               No featured jobs available.
             </p>
           )}
         </div>
+
+        {/* CTA Button */}
         <div className="text-center mt-12">
           <NavLink
             to="/jobs"
-            className="inline-block bg-[#1A5276] text-white px-6 py-3 sm:px-8 sm:py-4 font-poppins rounded-full font-medium hover:bg-blue-50 border border-transparent hover:border-[#1A5276] hover:text-[#1A5276] transition"
+            className="inline-block bg-[#1A5276] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-blue-50 border border-transparent hover:border-[#1A5276] hover:text-[#1A5276] transition duration-300"
           >
             Find More Jobs →
           </NavLink>

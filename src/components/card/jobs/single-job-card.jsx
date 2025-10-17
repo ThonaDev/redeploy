@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
 import { FiMapPin } from "react-icons/fi";
+import { NavLink } from "react-router-dom";
 
 const SingleJobCard = ({
   jobTitle,
@@ -10,7 +11,6 @@ const SingleJobCard = ({
   Photos,
   jobUuid,
 }) => {
-  // Track the bookmark status for this specific card
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const photoUrl =
@@ -18,9 +18,8 @@ const SingleJobCard = ({
       ? Photos[0].url
       : "https://via.placeholder.com/400x200";
 
-  // Function to toggle the bookmark state
   const handleBookmarkClick = (e) => {
-    e.stopPropagation(); // Prevents card click logic if any
+    e.stopPropagation();
     setIsBookmarked(!isBookmarked);
     console.log(
       `Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`
@@ -28,10 +27,11 @@ const SingleJobCard = ({
   };
 
   return (
-    <div
+    <NavLink
+      to={`/job-details/${jobUuid}`} // Fixed the to prop
       className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-md overflow-hidden
-                      transition-all duration-300 ease-in-out 
-                      outline-gray-200 hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2"
+                 transition-all duration-300 ease-in-out 
+                 outline-gray-200 hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2"
     >
       <div className="relative">
         <img
@@ -69,12 +69,15 @@ const SingleJobCard = ({
           <span className="text-xl font-semibold text-[#1A5276]">
             {salary}$
           </span>
-          <button className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm">
+          <NavLink
+            to="/apply"
+            className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm cursor-pointer"
+          >
             Apply
-          </button>
+          </NavLink>
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };
 
