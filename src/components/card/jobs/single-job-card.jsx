@@ -1,25 +1,84 @@
-import React from "react";
+import React, { useState } from "react";
+import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
+import { FiMapPin } from "react-icons/fi";
+import { NavLink } from "react-router-dom";
 
-export default function SingleJobCard() {
+const SingleJobCard = ({
+  jobTitle,
+  postDate,
+  location,
+  salary,
+  Photos,
+  jobUuid,
+}) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  const photoUrl =
+    Photos && Photos.length > 0
+      ? Photos[0].url
+      : "https://via.placeholder.com/400x200";
+
+  const handleBookmarkClick = (e) => {
+    e.stopPropagation();
+    setIsBookmarked(!isBookmarked);
+    console.log(
+      `Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`
+    );
+  };
+
   return (
-    <div className="max-w-sm rounded overflow-hidden shadow-lg m-4">
-      <div className="px-6 py-4">
-        <div className="font-bold text-xl mb-2">Frontend Developer</div>
-        <p className="text-gray-700 text-base">
-          We are looking for a skilled frontend developer to join our team.
-        </p>
+    <NavLink
+      to={`/job-details/${jobUuid}`} // Fixed the to prop
+      className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-md overflow-hidden
+                 transition-all duration-300 ease-in-out 
+                 outline-gray-200 hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2"
+    >
+      <div className="relative">
+        <img
+          src={photoUrl}
+          alt="Job listing visual"
+          className="w-full h-48 object-cover p-4 rounded-[20px]"
+        />
+        <button
+          aria-label="Bookmark job"
+          className="absolute top-5 right-5 bg-white rounded-full p-2 shadow-md"
+          onClick={handleBookmarkClick}
+        >
+          {isBookmarked ? (
+            <FaBookmark color="#FF7A00" size={24} />
+          ) : (
+            <FaRegBookmark color="#FF7A00" size={24} />
+          )}
+        </button>
       </div>
-      <div className="px-6 pt-4 pb-2">
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #frontend
-        </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #developer
-        </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #react
-        </span>
+      <div className="px-4">
+        <h2 className="text-xl md:text-xl text-left font-bold text-[#1A5276] mb-2">
+          {jobTitle}
+        </h2>
+        <div className="text-sm text-[#1A5276] mb-2">
+          <span className="mr-4">
+            Posted: {new Date(postDate).toLocaleDateString()}
+          </span>
+          <span className="flex items-center">
+            <FiMapPin size={16} className="mr-1" />
+            {location}
+          </span>
+        </div>
+        <hr className="border-t border-gray-200 mb-2" />
+        <div className="flex items-center justify-between pb-4 pt-2">
+          <span className="text-xl font-semibold text-[#1A5276]">
+            {salary}$
+          </span>
+          <NavLink
+            to="/apply"
+            className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm cursor-pointer"
+          >
+            Apply
+          </NavLink>
+        </div>
       </div>
-    </div>
+    </NavLink>
   );
-}
+};
+
+export default SingleJobCard;

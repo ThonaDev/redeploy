@@ -1,23 +1,144 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getDecryptedAccessToken } from "../../utils/tokenUtils";
+import {
+  getDecryptedAccessToken,
+  getDecryptedRefreshToken,
+  storeAccessToken,
+  storeRefreshToken,
+  clearTokens,
+} from "../../utils/tokenUtils";
+import { setCredentials, clearCredentials } from "../auth/authSlide";
 
-// custom fetchBaseQuery to handle the base URL
+// Define public endpoints that do not require Authorization header
+const PUBLIC_ENDPOINTS = [
+  "login",
+  "register",
+  "getAllJobs",
+  "getPaginatedJobs",
+  "getLatestJobs",
+  "getJobById",
+];
+
 const baseQueryCustom = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BASE_URL,
-  prepareHeaders: (headers) => {
-    const accessToken = getDecryptedAccessToken();
-
-    if (accessToken) {
-      headers.set("Authorization", accessToken);
+  prepareHeaders: (headers, { endpoint }) => {
+    if (!PUBLIC_ENDPOINTS.includes(endpoint)) {
+      const accessToken = getDecryptedAccessToken();
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+      }
     }
-
+    console.log(`Preparing headers for endpoint: ${endpoint}`, headers.get("Authorization"));
     return headers;
   },
 });
 
-// Define a service using a base URL and expected endpoints
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQueryCustom(args, api, extraOptions);
+
+  if (result.error?.status === 401 && !PUBLIC_ENDPOINTS.includes(api.endpoint)) {
+    console.log("Attempting to refresh token...");
+    const refreshToken = getDecryptedRefreshToken();
+    if (refreshToken) {
+      try {
+        const refreshResult = await baseQueryCustom(
+          {
+            url: "/auth/get-new-token",
+            method: "POST",
+            body: { refreshToken },
+          },
+          api,
+          extraOptions
+        );
+
+        if (refreshResult.data) {
+          console.log("Refresh token success:", refreshResult.data);
+          const { accessToken, refreshToken: newRefreshToken } = refreshResult.data.data;
+          storeAccessToken(accessToken);
+          storeRefreshToken(newRefreshToken);
+          api.dispatch(setCredentials({ accessToken, refreshToken: newRefreshToken }));
+          result = await baseQueryCustom(args, api, extraOptions);
+        } else {
+          console.error("Refresh token failed:", refreshResult.error);
+          api.dispatch(clearCredentials());
+          clearTokens();
+        }
+      } catch (error) {
+        console.error("Refresh token error:", error);
+        api.dispatch(clearCredentials());
+        clearTokens();
+      }
+    } else {
+      console.error("No refresh token available");
+      api.dispatch(clearCredentials());
+      clearTokens();
+    }
+  }
+
+  return result;
+};
+
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
-  baseQuery: baseQueryCustom,
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ["User"],
   endpoints: (build) => ({}),
 });
+
+export const authApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    login: builder.mutation({
+      query: (body) => ({
+        url: "/auth/login",
+        method: "POST",
+        body,
+      }),
+    }),
+    register: builder.mutation({
+      query: (body) => ({
+        url: "/auth/register",
+        method: "POST",
+        body,
+      }),
+    }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "/auth/logout",
+        method: "POST",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    getUser: builder.query({
+      query: () => ({
+        url: "/users/me",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: ["User"],
+      onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          console.log("Fetched user data:", data);
+          dispatch(setCredentials({ user: { name: data.name, email: data.email } }));
+        } catch (error) {
+          console.error("Failed to fetch user data:", error);
+        }
+      },
+    }),
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: "/auth/get-new-token",
+        method: "POST",
+        body: { refreshToken: getDecryptedRefreshToken() },
+      }),
+    }),
+  }),
+  overrideExisting: false,
+});
+
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useGetUserQuery,
+  useRefreshTokenMutation,
+} = authApi;
