@@ -110,12 +110,12 @@ const NavBar = () => {
       </div>
 
       <div className="hidden lg:flex items-center space-x-6 relative">
-        <div className="relative flex items-center bg-gray-100 rounded-full px-4 py-2">
+        <div className="relative flex items-center bg-gray-100 rounded-full px-4 py-2 ">
           <FiSearch className="text-[#1A5276] mr-2" size={20} />
           <input
             type="text"
             placeholder="Search"
-            className="bg-transparent outline-none text-[#1A5276] placeholder-[#1A5276] w-32 lg:w-48"
+            className="bg-transparent outline-none text-[#1A5276] placeholder-[#1A5276] w-32 lg:w-48 "
           />
         </div>
         <div
@@ -233,7 +233,7 @@ const NavBar = () => {
                 : "flex items-center px-2 text-[#1A5276] hover:text-[#FF7A00] transition-colors"
             }
           >
-            <CgProfile className="mr-3" size={20} /> {username}
+            <FiUser className="mr-3" size={20} /> {username}
           </NavLink>
           <NavLink
             to="/saved-jobs"

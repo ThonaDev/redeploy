@@ -1,14 +1,33 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getDecryptedAccessToken, getDecryptedRefreshToken, storeAccessToken, storeRefreshToken, clearTokens } from "../../utils/tokenUtils";
+import {
+  getDecryptedAccessToken,
+  getDecryptedRefreshToken,
+  storeAccessToken,
+  storeRefreshToken,
+  clearTokens,
+} from "../../utils/tokenUtils";
 import { setCredentials, clearCredentials } from "../auth/authSlide";
+
+// Define public endpoints that do not require Authorization header
+const PUBLIC_ENDPOINTS = [
+  "login",
+  "register",
+  "getAllJobs",
+  "getPaginatedJobs",
+  "getLatestJobs",
+  "getJobById",
+];
 
 const baseQueryCustom = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BASE_URL,
-  prepareHeaders: (headers) => {
-    const accessToken = getDecryptedAccessToken();
-    if (accessToken) {
-      headers.set("Authorization", `Bearer ${accessToken}`);
+  prepareHeaders: (headers, { endpoint }) => {
+    if (!PUBLIC_ENDPOINTS.includes(endpoint)) {
+      const accessToken = getDecryptedAccessToken();
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
+      }
     }
+    console.log(`Preparing headers for endpoint: ${endpoint}`, headers.get("Authorization"));
     return headers;
   },
 });
@@ -16,13 +35,14 @@ const baseQueryCustom = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQueryCustom(args, api, extraOptions);
 
-  if (result.error?.status === 401) {
+  if (result.error?.status === 401 && !PUBLIC_ENDPOINTS.includes(api.endpoint)) {
+    console.log("Attempting to refresh token...");
     const refreshToken = getDecryptedRefreshToken();
     if (refreshToken) {
       try {
         const refreshResult = await baseQueryCustom(
           {
-            url: "/auth/refresh-token",
+            url: "/auth/get-new-token",
             method: "POST",
             body: { refreshToken },
           },
@@ -31,12 +51,14 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
         );
 
         if (refreshResult.data) {
+          console.log("Refresh token success:", refreshResult.data);
           const { accessToken, refreshToken: newRefreshToken } = refreshResult.data.data;
           storeAccessToken(accessToken);
           storeRefreshToken(newRefreshToken);
           api.dispatch(setCredentials({ accessToken, refreshToken: newRefreshToken }));
           result = await baseQueryCustom(args, api, extraOptions);
         } else {
+          console.error("Refresh token failed:", refreshResult.error);
           api.dispatch(clearCredentials());
           clearTokens();
         }
@@ -46,6 +68,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
         clearTokens();
       }
     } else {
+      console.error("No refresh token available");
       api.dispatch(clearCredentials());
       clearTokens();
     }
@@ -94,6 +117,7 @@ export const authApi = apiSlice.injectEndpoints({
       onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
+          console.log("Fetched user data:", data);
           dispatch(setCredentials({ user: { name: data.name, email: data.email } }));
         } catch (error) {
           console.error("Failed to fetch user data:", error);
@@ -102,7 +126,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     refreshToken: builder.mutation({
       query: () => ({
-        url: "/auth/refresh-token",
+        url: "/auth/get-new-token",
         method: "POST",
         body: { refreshToken: getDecryptedRefreshToken() },
       }),
@@ -111,4 +135,10 @@ export const authApi = apiSlice.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetUserQuery, useRefreshTokenMutation } = authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useGetUserQuery,
+  useRefreshTokenMutation,
+} = authApi;

@@ -15,11 +15,6 @@ export default function RootLayout() {
   // Debug logging
   console.log("RootLayout state:", { isAuthenticated, accessToken, isLoading, isError, isSuccess });
 
-  // Show loading state while fetching user data
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   // Render NavBar if authenticated and user fetch is successful, otherwise Nav
   const isLoggedIn = isAuthenticated && accessToken && isSuccess && !isError;
 
