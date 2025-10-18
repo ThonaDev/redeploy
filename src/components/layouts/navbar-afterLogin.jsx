@@ -100,7 +100,7 @@ const NavBar = () => {
             to={item.path}
             className={({ isActive }) =>
               isActive
-                ? "text-[#1A5276] font-semibold hover:text-[#FF7A00] transition-colors"
+                ? "text-green-500 font-semibold hover:text-[#FF7A00] transition-colors"
                 : "text-[#1A5276] hover:text-[#FF7A00] transition-colors"
             }
           >
@@ -150,7 +150,7 @@ const NavBar = () => {
                 to="/profile"
                 className={({ isActive }) =>
                   isActive
-                    ? "flex items-center px-4 py-3 text-[#1A5276] font-semibold hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
+                    ? "flex items-center px-4 py-3 text-green-500 font-semibold hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
                     : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
                 }
                 onClick={() => setProfileOpen(false)}
@@ -162,7 +162,7 @@ const NavBar = () => {
                 to="/saved-jobs"
                 className={({ isActive }) =>
                   isActive
-                    ? "flex items-center px-4 py-3 text-[#1A5276] font-semibold hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
+                    ? "flex items-center px-4 py-3 text-green-500 font-semibold hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
                     : "flex items-center px-4 py-3 text-[#1A5276] hover:bg-gray-50 hover:text-[#FF7A00] transition-colors"
                 }
                 onClick={() => setProfileOpen(false)}
@@ -207,7 +207,7 @@ const NavBar = () => {
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 isActive
-                  ? "text-[#1A5276] font-semibold hover:text-[#FF7A00] transition-colors px-2"
+                  ? "text-green-500 font-semibold hover:text-[#FF7A00] transition-colors px-2"
                   : "text-[#1A5276] hover:text-[#FF7A00] transition-colors px-2"
               }
             >
@@ -229,7 +229,7 @@ const NavBar = () => {
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               isActive
-                ? "flex items-center px-2 text-[#1A5276] font-semibold hover:text-[#FF7A00] transition-colors"
+                ? "flex items-center px-2 text-green-500 font-semibold hover:text-[#FF7A00] transition-colors"
                 : "flex items-center px-2 text-[#1A5276] hover:text-[#FF7A00] transition-colors"
             }
           >
@@ -240,7 +240,7 @@ const NavBar = () => {
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               isActive
-                ? "flex items-center px-2 py-2 text-[#1A5276] font-semibold hover:text-[#FF7A00] transition-colors"
+                ? "flex items-center px-2 py-2 text-green-500 font-semibold hover:text-[#FF7A00] transition-colors"
                 : "flex items-center px-2 py-2 text-[#1A5276] hover:text-[#FF7A00] transition-colors"
             }
           >
