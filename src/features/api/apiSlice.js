@@ -16,6 +16,8 @@ const PUBLIC_ENDPOINTS = [
   "getPaginatedJobs",
   "getLatestJobs",
   "getJobById",
+  "getPositions",
+  "getSkills",
 ];
 
 const baseQueryCustom = fetchBaseQuery({
@@ -27,7 +29,10 @@ const baseQueryCustom = fetchBaseQuery({
         headers.set("Authorization", `Bearer ${accessToken}`);
       }
     }
-    console.log(`Preparing headers for endpoint: ${endpoint}`, headers.get("Authorization"));
+    console.log(
+      `Preparing headers for endpoint: ${endpoint}`,
+      headers.get("Authorization")
+    );
     return headers;
   },
 });
@@ -35,7 +40,10 @@ const baseQueryCustom = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQueryCustom(args, api, extraOptions);
 
-  if (result.error?.status === 401 && !PUBLIC_ENDPOINTS.includes(api.endpoint)) {
+  if (
+    result.error?.status === 401 &&
+    !PUBLIC_ENDPOINTS.includes(api.endpoint)
+  ) {
     console.log("Attempting to refresh token...");
     const refreshToken = getDecryptedRefreshToken();
     if (refreshToken) {
@@ -52,10 +60,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
         if (refreshResult.data) {
           console.log("Refresh token success:", refreshResult.data);
-          const { accessToken, refreshToken: newRefreshToken } = refreshResult.data.data;
+          const { accessToken, refreshToken: newRefreshToken } =
+            refreshResult.data.data;
           storeAccessToken(accessToken);
           storeRefreshToken(newRefreshToken);
-          api.dispatch(setCredentials({ accessToken, refreshToken: newRefreshToken }));
+          api.dispatch(
+            setCredentials({ accessToken, refreshToken: newRefreshToken })
+          );
           result = await baseQueryCustom(args, api, extraOptions);
         } else {
           console.error("Refresh token failed:", refreshResult.error);
@@ -80,34 +91,30 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User"],
-  endpoints: (build) => ({}),
-});
-
-export const authApi = apiSlice.injectEndpoints({
-  endpoints: (builder) => ({
-    login: builder.mutation({
+  tagTypes: ["User", "Positions", "Skills"],
+  endpoints: (build) => ({
+    login: build.mutation({
       query: (body) => ({
         url: "/auth/login",
         method: "POST",
         body,
       }),
     }),
-    register: builder.mutation({
+    register: build.mutation({
       query: (body) => ({
         url: "/auth/register",
         method: "POST",
         body,
       }),
     }),
-    logout: builder.mutation({
+    logout: build.mutation({
       query: () => ({
         url: "/auth/logout",
         method: "POST",
       }),
       invalidatesTags: ["User"],
     }),
-    getUser: builder.query({
+    getUser: build.query({
       query: () => ({
         url: "/users/me",
         method: "GET",
@@ -118,21 +125,46 @@ export const authApi = apiSlice.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           console.log("Fetched user data:", data);
-          dispatch(setCredentials({ user: { name: data.name, email: data.email } }));
+          dispatch(
+            setCredentials({ user: { name: data.name, email: data.email } })
+          );
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         }
       },
     }),
-    refreshToken: builder.mutation({
+    refreshToken: build.mutation({
       query: () => ({
         url: "/auth/get-new-token",
         method: "POST",
         body: { refreshToken: getDecryptedRefreshToken() },
       }),
     }),
+    getPositions: build.query({
+      query: () => ({
+        url: "/positions",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: ["Positions"],
+    }),
+    getSkills: build.query({
+      query: () => ({
+        url: "/skills",
+        method: "GET",
+      }),
+      transformResponse: (response) => response.data,
+      providesTags: ["Skills"],
+    }),
+    updateUser: build.mutation({
+      query: ({ userId, formData }) => ({
+        url: `/users/update/${userId}`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
-  overrideExisting: false,
 });
 
 export const {
@@ -141,4 +173,7 @@ export const {
   useLogoutMutation,
   useGetUserQuery,
   useRefreshTokenMutation,
-} = authApi;
+  useGetPositionsQuery,
+  useGetSkillsQuery,
+  useUpdateUserMutation,
+} = apiSlice;

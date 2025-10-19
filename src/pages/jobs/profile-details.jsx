@@ -1,18 +1,486 @@
-import { useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { FiCamera, FiUploadCloud, FiChevronDown, FiX } from "react-icons/fi";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation } from "../../features/api/apiSlice";
 
-export default function Profile() {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+// --- Validation Schema ---
+const profileSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Full name must be at least 3 characters")
+    .nonempty("Full name is required"),
+  email: z.string().email("Enter a valid email").nonempty("Email is required"),
+  contact: z
+    .string()
+    .regex(/^\d{9,12}$/, "Contact must be a valid phone number (9-12 digits)")
+    .optional()
+    .or(z.literal("")),
+  jobTitle: z.string().optional().or(z.literal("")),
+  gender: z.enum(["Male", "Female", "Other"]).optional().or(z.literal("")),
+  skills: z.array(z.string()).optional(),
+  bio: z.string().max(200, "Bio must be less than 200 characters").optional(),
+});
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+// --- Helper Components ---
+const FormInput = ({
+  label,
+  id,
+  type = "text",
+  register,
+  errors,
+  placeholder = "",
+}) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-normal text-[#1A5276] mb-1">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    <input
+      type={type}
+      id={id}
+      {...register(id)}
+      placeholder={placeholder}
+      className={`px-4 py-3 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out hover:border-[#149AC5] ${
+        errors[id] ? "border-red-500" : ""
+      }`}
+    />
+    {errors[id] && (
+      <p className="text-red-500 text-sm mt-1">{errors[id].message}</p>
+    )}
+  </div>
+);
+
+const FormSelect = ({
+  label,
+  id,
+  multiple = false,
+  value,
+  onChange,
+  options,
+  errors,
+}) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-normal text-[#1A5276] mb-1">
+      {label} {multiple ? "" : ""}
+    </label>
+    <div className="relative">
+      <select
+        id={id}
+        multiple={multiple}
+        value={value || (multiple ? [] : "")}
+        onChange={onChange}
+        className={`appearance-none block w-full px-4 py-3 border border-[#1A5276] rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out cursor-pointer hover:border-[#149AC5] ${
+          errors[id] ? "border-red-500" : ""
+        } ${multiple ? "h-24" : ""}`}
+      >
+        {!multiple && <option value="">Select a {label}</option>}
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {!multiple && (
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-[#1A5276]">
+          <FiChevronDown className="w-5 h-5" />
+        </div>
+      )}
+    </div>
+    {errors[id] && (
+      <p className="text-red-500 text-sm mt-1">{errors[id].message}</p>
+    )}
+  </div>
+);
+
+const FormTextarea = ({
+  label,
+  id,
+  register,
+  errors,
+  rows = 3,
+  placeholder = "",
+  maxLength,
+}) => {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [register(id).value]);
+
+  return (
+    <div className="flex flex-col">
+      <label htmlFor={id} className="text-sm font-normal text-[#1A5276] mb-1">
+        {label}
+      </label>
+      <textarea
+        ref={textareaRef}
+        id={id}
+        {...register(id)}
+        rows={rows}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className={`px-4 py-3 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out resize-none overflow-hidden hover:border-[#149AC5] ${
+          errors[id] ? "border-red-500" : ""
+        }`}
+        style={{ minHeight: `${rows * 1.5}em` }}
+      />
+      {errors[id] && (
+        <p className="text-red-500 text-sm mt-1">{errors[id].message}</p>
+      )}
+    </div>
+  );
+};
+
+// --- Main Component ---
+const ProfileDetail = () => {
+  const fileInputRef = useRef(null);
+  const cvInputRef = useRef(null);
+
+  const { data: userData, isLoading: userLoading, error: userError } = useGetUserQuery();
+  const { data: positionsData, isLoading: positionsLoading, error: positionsError } = useGetPositionsQuery();
+  const { data: skillsData, isLoading: skillsLoading, error: skillsError } = useGetSkillsQuery();
+  const [updateUser, { isLoading: isUpdating, error: updateError }] = useUpdateUserMutation();
+
+  const { control, register, handleSubmit, formState: { errors }, reset } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      contact: "",
+      jobTitle: "",
+      gender: "",
+      skills: [],
+      bio: "",
+    },
+  });
+
+  const [profileImage, setProfileImage] = useState("https://placehold.co/200x200");
+  const [hasFallback, setHasFallback] = useState(false);
+
+  useEffect(() => {
+    if (userData) {
+      console.log("userData:", userData); // Debug user data
+      const skills = userData.skills?.map((skill) => skill.skillName) || [];
+      const normalizedGender = userData.gender
+        ? userData.gender.toLowerCase() === "male"
+          ? "Male"
+          : userData.gender.toLowerCase() === "female"
+          ? "Female"
+          : userData.gender.toLowerCase() === "other"
+          ? "Other"
+          : ""
+        : "";
+      reset({
+        fullName: userData.name || "",
+        email: userData.email || "",
+        contact: userData.phoneNumber || "",
+        jobTitle: userData.positions?.[0]?.title || "",
+        gender: normalizedGender,
+        skills: skills,
+        bio: userData.bio || "",
+      });
+      if (userData.profile) {
+        const VITE_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000";
+        const profileUrl = userData.profile.startsWith("http")
+          ? userData.profile
+          : `${VITE_BASE_URL}/${userData.profile}`;
+        setProfileImage(profileUrl);
+      }
+    }
+  }, [userData, reset]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const newImageUrl = URL.createObjectURL(file);
+      setProfileImage(newImageUrl);
+      setHasFallback(false);
+    }
+  };
+
+  const handleCVChange = (e) => {
+    // Skipped for now
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      const userId = userData?.uuid;
+      if (!userId) {
+        toast.error("User ID not found. Please log in again.");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("name", data.fullName);
+      formData.append("gender", data.gender.toUpperCase());
+      if (fileInputRef.current?.files[0]) {
+        formData.append("profile", fileInputRef.current.files[0]);
+      } else {
+        formData.append("profile", userData?.profile || "");
+      }
+      formData.append("coverPhoto", userData?.coverPhoto || "");
+      formData.append("phoneNumber", data.contact);
+      formData.append("bio", data.bio);
+      formData.append("isOtpAuthentication", JSON.stringify(false));
+      formData.append("expectedSalary", JSON.stringify(0));
+
+      // Map jobTitle to position UUID
+      const positionUuid = positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
+      formData.append("positions", JSON.stringify(positionUuid ? [positionUuid] : []));
+
+      // Map skills to skill UUIDs
+      const skillUuids = data.skills
+        .map((skillName) => skillsData?.find((skill) => skill.skillName === skillName)?.uuid)
+        .filter(Boolean);
+      formData.append("skillUuids", JSON.stringify(skillUuids));
+
+      const result = await updateUser({ userId, formData }).unwrap();
+      console.log("Update successful:", result);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Update failed:", error);
+      toast.error("Failed to update profile. Please try again.");
+    }
+  };
+
+  // Prepare position options
+  const positionOptions = positionsData
+    ? [
+        ...positionsData.map((pos) => ({
+          value: pos.title,
+          label: pos.title,
+        })),
+        { value: "Others", label: "Others" },
+      ]
+    : [{ value: "Others", label: "Others" }];
+
+  // Prepare skill options
+  const skillOptions = skillsData
+    ? [
+        ...skillsData.map((skill) => ({
+          value: skill.skillName,
+          label: skill.skillName,
+        })),
+        { value: "Others", label: "Others" },
+      ]
+    : [{ value: "Others", label: "Others" }];
+
+  if (userLoading || positionsLoading || skillsLoading) {
+    return <div className="text-center p-8">Loading...</div>;
+  }
+
+  if (userError || positionsError || skillsError) {
+    return (
+      <div className="text-center p-8 text-red-500">
+        Error loading data. Please try again.
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-6">
-      <h1 className="text-3xl font-bold text-[#1A5276]">Profile Page</h1>
-      <p>This is your profile page, accessible only to authenticated users.</p>
-      {/* Add your profile content here */}
+    <div className="max-w-6xl mx-auto p-8 bg-white rounded-lg font-sans mt-8 mb-12">
+      <form onSubmit={handleSubmit(onSubmit)} className="">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* COLUMN 1: Profile Picture */}
+          <div className="col-span-1 flex flex-col items-center">
+            <div className="relative mb-2 mx-auto">
+              <h1 className="text-xl font-semibold text-[#1A5276] mb-8">
+                Personal Detail
+              </h1>
+              <div className="w-50 h-50 rounded-full overflow-hidden border-3 border-[#1A5276]">
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    if (!hasFallback) {
+                      e.target.src = "https://placehold.co/200x200";
+                      setHasFallback(true);
+                    }
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={triggerFileInput}
+                className="absolute bottom-0 left-1/2 transform -translate-x-4/5 translate-y-12 p-2 border-2 border-[#1A5276] rounded-full shadow-md hover:border-[#149AC5] transition z-10 bg-transparent"
+                aria-label="Change profile picture"
+              >
+                <FiCamera className="w-4 h-4 text-[#1A5276] hover:text-[#149AC5]" />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* COLUMN 2 */}
+          <div className="col-span-1 space-y-4">
+            <FormInput
+              label="Full name"
+              id="fullName"
+              register={register}
+              errors={errors}
+              placeholder="Phat Phea"
+            />
+            <FormInput
+              label="Email"
+              id="email"
+              type="email"
+              register={register}
+              errors={errors}
+              placeholder="phartphea854@gmail.com"
+            />
+            <FormInput
+              label="Contact"
+              id="contact"
+              register={register}
+              errors={errors}
+              placeholder="0969537167"
+            />
+            <Controller
+              name="jobTitle"
+              control={control}
+              render={({ field }) => (
+                <FormSelect
+                  label="Job Title"
+                  id="jobTitle"
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  options={positionOptions}
+                  errors={errors}
+                />
+              )}
+            />
+          </div>
+
+          {/* COLUMN 3 */}
+          <div className="col-span-1 space-y-4">
+            <Controller
+              name="gender"
+              control={control}
+              render={({ field }) => (
+                <FormSelect
+                  label="Gender"
+                  id="gender"
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  options={[
+                    { value: "Male", label: "Male" },
+                    { value: "Female", label: "Female" },
+                    { value: "Other", label: "Other" },
+                  ]}
+                  errors={errors}
+                />
+              )}
+            />
+            <Controller
+              name="skills"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <FormSelect
+                    label="Skill"
+                    id="skills"
+                    value=""
+                    onChange={(e) => {
+                      const selectedSkill = e.target.value;
+                      if (selectedSkill && !field.value.includes(selectedSkill)) {
+                        const updatedSkills = [...field.value, selectedSkill];
+                        field.onChange(updatedSkills);
+                      }
+                      e.target.value = ""; // Reset dropdown after selection
+                    }}
+                    options={skillOptions}
+                    errors={errors}
+                  />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {field.value?.map((skill) => (
+                      <div
+                        key={skill}
+                        className="flex items-center bg-[#ECF2FF] text-[#1A5276] px-3 py-1 rounded-full text-sm"
+                      >
+                        {skill}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSkills = field.value.filter((s) => s !== skill);
+                            field.onChange(newSkills);
+                          }}
+                          className="ml-2 text-[#1A5276] hover:text-[#149AC5]"
+                        >
+                          <FiX size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            />
+            <FormTextarea
+              label="Bio"
+              id="bio"
+              register={register}
+              errors={errors}
+              rows={1}
+              placeholder="I love coding..."
+              maxLength={200}
+            />
+          </div>
+        </div>
+
+        {/* Upload CV */}
+        <div className="pt-4">
+          <h2 className="text-xl font-medium text-[#1A5276] mb-3">Upload CV</h2>
+          <div className="border border-[#1A5276] rounded-lg py-2 text-center hover:border-[#149AC5] transition duration-150 ease-in-out">
+            <input
+              type="file"
+              ref={cvInputRef}
+              id="cvUpload"
+              className="hidden"
+              accept=".pdf"
+              onChange={handleCVChange}
+              disabled
+            />
+            <label
+              htmlFor="cvUpload"
+              className="flex flex-col items-center justify-center text-[#1A5276] opacity-50 cursor-not-allowed"
+            >
+              <FiUploadCloud className="w-5 h-5 mb-2" />
+              <span className="font-medium text-md">Upload your CV PDF (Disabled)</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="pt-6">
+          <button
+            type="submit"
+            disabled={isUpdating}
+            className={`w-full py-2 bg-[#1A5276] text-white font-semibold text-lg rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-4 focus:ring-[#149AC5] transition duration-150 ease-in-out ${
+              isUpdating ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {isUpdating ? "Saving..." : "Save changes"}
+          </button>
+        </div>
+      </form>
+      <ToastContainer />
     </div>
   );
-}
+};
+
+export default ProfileDetail;
