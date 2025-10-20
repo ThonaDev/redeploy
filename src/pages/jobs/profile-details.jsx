@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiCamera, FiUploadCloud, FiChevronDown, FiX } from "react-icons/fi";
+import { FiCamera, FiUploadCloud, FiChevronDown, FiX, FiEye } from "react-icons/fi";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation, useCreateCVMutation } from "../../features/api/apiSlice";
+import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation, useCreateCVMutation, useGetUserCVsQuery } from "../../features/api/apiSlice";
 
 // --- Validation Schema ---
 const profileSchema = z.object({
@@ -148,6 +148,9 @@ const ProfileDetail = () => {
   const [updateUser, { isLoading: isUpdating, error: updateError }] = useUpdateUserMutation();
   const [uploadMedia, { isLoading: isUploadingMedia, error: uploadError }] = useUploadMediaMutation();
   const [createCV, { isLoading: isCreatingCV, error: createCVError }] = useCreateCVMutation();
+  const { data: latestCV, isLoading: cvLoading, error: cvError } = useGetUserCVsQuery(userData?.uuid, {
+    skip: !userData?.uuid, // Skip query until userData is available
+  });
 
   const { control, register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(profileSchema),
@@ -198,6 +201,15 @@ const ProfileDetail = () => {
     }
   }, [userData, reset]);
 
+  useEffect(() => {
+    if (latestCV) {
+      console.log("Latest CV:", latestCV); // Debug latest CV data
+      console.log("CV fileUrl:", latestCV.fileUrl);
+    } else if (cvError) {
+      console.error("CV fetch error:", cvError);
+    }
+  }, [latestCV, cvError]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -240,6 +252,19 @@ const ProfileDetail = () => {
     cvInputRef.current.click();
   };
 
+  const handleViewCV = () => {
+    if (latestCV && latestCV.fileUrl) {
+      console.log("Attempting to open CV:", latestCV.fileUrl);
+      if (!latestCV.fileUrl.toLowerCase().endsWith(".pdf")) {
+        toast.error("Invalid CV file format. Please upload a valid PDF.");
+        return;
+      }
+      window.open(latestCV.fileUrl, "_blank");
+    } else {
+      toast.error("No CV found. Please upload a CV first.");
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       const userId = userData?.uuid;
@@ -255,7 +280,7 @@ const ProfileDetail = () => {
         const uploadResult = await uploadMedia(file).unwrap();
         console.log("Profile photo upload successful:", uploadResult);
         profileUrl = uploadResult.previewLink;
-        // toast.success("Profile photo uploaded successfully!");
+        toast.success("Profile photo uploaded successfully!");
       }
 
       let cvUrl = "";
@@ -264,8 +289,12 @@ const ProfileDetail = () => {
         console.log("Uploading CV:", file.name);
         const uploadResult = await uploadMedia(file).unwrap();
         console.log("CV upload successful:", uploadResult);
+        if (!uploadResult.previewLink.toLowerCase().endsWith(".pdf")) {
+          toast.error("Uploaded CV is not a valid PDF. Please try again.");
+          return;
+        }
         cvUrl = uploadResult.previewLink;
-        // toast.success("CV uploaded successfully!");
+        toast.success("CV uploaded successfully!");
       }
 
       const positionUuid = positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
@@ -299,7 +328,7 @@ const ProfileDetail = () => {
         console.log("Submitting CV JSON:", cvBody);
         const cvResult = await createCV(cvBody).unwrap();
         console.log("CV creation successful:", cvResult);
-        // toast.success("CV saved successfully!");
+        toast.success("CV saved successfully!");
       }
     } catch (error) {
       console.error("Error:", error, "Status:", error.status, "Data:", error.data);
@@ -339,15 +368,15 @@ const ProfileDetail = () => {
       ]
     : [{ value: "Others", label: "Others" }];
 
-  if (userLoading || positionsLoading || skillsLoading) {
+  if (userLoading || positionsLoading || skillsLoading || cvLoading) {
     return <div className="text-center p-8">Loading...</div>;
   }
 
-  if (userError || positionsError || skillsError) {
-    console.log("Errors:", { userError, positionsError, skillsError });
+  if (userError || positionsError || skillsError || cvError) {
+    console.log("Errors:", { userError, positionsError, skillsError, cvError });
     return (
       <div className="text-center p-8 text-red-500">
-        Error loading data: {userError?.data?.message || positionsError?.data?.message || skillsError?.data?.message || "Please try again."}
+        Error loading data: {userError?.data?.message || positionsError?.data?.message || skillsError?.data?.message || cvError?.data?.message || "Please try again."}
       </div>
     );
   }
@@ -530,6 +559,16 @@ const ProfileDetail = () => {
                 {cvFileName ? cvFileName : "Upload your CV (PDF)"}
               </span>
             </label>
+          </div>
+          <div className="mt-3 text-center">
+            <button
+              type="button"
+              onClick={handleViewCV}
+              className="flex items-center justify-center mx-auto px-4 py-2 bg-[#1A5276] text-white font-medium text-md rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-2 focus:ring-[#149AC5] transition duration-150 ease-in-out"
+            >
+              <FiEye className="w-5 h-5 mr-2" />
+              View my current CV
+            </button>
           </div>
         </div>
 

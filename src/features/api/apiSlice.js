@@ -189,6 +189,21 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["CV"],
     }),
+    getUserCVs: build.query({
+      query: (userId) => ({
+        url: `/cvs/user/${userId}?pageNumber=0&pageSize=5`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const cvs = response.data.content;
+        // Sort by uploadedAt to get the latest CV
+        const latestCV = cvs.sort((a, b) => 
+          new Date(b.uploadedAt) - new Date(a.uploadedAt)
+        )[0];
+        return latestCV || null; // Return latest CV or null if none exist
+      },
+      providesTags: ["CV"],
+    }),
   }),
 });
 
@@ -203,4 +218,5 @@ export const {
   useUpdateUserMutation,
   useUploadMediaMutation,
   useCreateCVMutation,
+  useGetUserCVsQuery,
 } = apiSlice;
