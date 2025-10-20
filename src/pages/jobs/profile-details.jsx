@@ -1,11 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiCamera, FiUploadCloud, FiChevronDown, FiX, FiEye } from "react-icons/fi";
+import {
+  FiCamera,
+  FiUploadCloud,
+  FiChevronDown,
+  FiX,
+  FiEye,
+} from "react-icons/fi";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation, useCreateCVMutation, useGetUserCVsQuery } from "../../features/api/apiSlice";
+import {
+  useGetUserQuery,
+  useGetPositionsQuery,
+  useGetSkillsQuery,
+  useUpdateUserMutation,
+  useUploadMediaMutation,
+  useCreateCVMutation,
+  useGetUserCVsQuery,
+} from "../../features/api/apiSlice";
 
 // --- Validation Schema ---
 const profileSchema = z.object({
@@ -142,17 +156,42 @@ const ProfileDetail = () => {
   const fileInputRef = useRef(null);
   const cvInputRef = useRef(null);
 
-  const { data: userData, isLoading: userLoading, error: userError } = useGetUserQuery();
-  const { data: positionsData, isLoading: positionsLoading, error: positionsError } = useGetPositionsQuery();
-  const { data: skillsData, isLoading: skillsLoading, error: skillsError } = useGetSkillsQuery();
-  const [updateUser, { isLoading: isUpdating, error: updateError }] = useUpdateUserMutation();
-  const [uploadMedia, { isLoading: isUploadingMedia, error: uploadError }] = useUploadMediaMutation();
-  const [createCV, { isLoading: isCreatingCV, error: createCVError }] = useCreateCVMutation();
-  const { data: latestCV, isLoading: cvLoading, error: cvError } = useGetUserCVsQuery(userData?.uuid, {
+  const {
+    data: userData,
+    isLoading: userLoading,
+    error: userError,
+  } = useGetUserQuery();
+  const {
+    data: positionsData,
+    isLoading: positionsLoading,
+    error: positionsError,
+  } = useGetPositionsQuery();
+  const {
+    data: skillsData,
+    isLoading: skillsLoading,
+    error: skillsError,
+  } = useGetSkillsQuery();
+  const [updateUser, { isLoading: isUpdating, error: updateError }] =
+    useUpdateUserMutation();
+  const [uploadMedia, { isLoading: isUploadingMedia, error: uploadError }] =
+    useUploadMediaMutation();
+  const [createCV, { isLoading: isCreatingCV, error: createCVError }] =
+    useCreateCVMutation();
+  const {
+    data: latestCV,
+    isLoading: cvLoading,
+    error: cvError,
+  } = useGetUserCVsQuery(userData?.uuid, {
     skip: !userData?.uuid, // Skip query until userData is available
   });
 
-  const { control, register, handleSubmit, formState: { errors }, reset } = useForm({
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullName: "",
@@ -165,7 +204,9 @@ const ProfileDetail = () => {
     },
   });
 
-  const [profileImage, setProfileImage] = useState("https://placehold.co/200x200");
+  const [profileImage, setProfileImage] = useState(
+    "https://placehold.co/200x200"
+  );
   const [hasFallback, setHasFallback] = useState(false);
   const [cvFileName, setCvFileName] = useState(null);
 
@@ -192,7 +233,8 @@ const ProfileDetail = () => {
         bio: userData.bio || "",
       });
       if (userData.profile) {
-        const VITE_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000";
+        const VITE_BASE_URL =
+          import.meta.env.VITE_BASE_URL || "http://localhost:3000";
         const profileUrl = userData.profile.startsWith("http")
           ? userData.profile
           : `${VITE_BASE_URL}/${userData.profile}`;
@@ -217,7 +259,8 @@ const ProfileDetail = () => {
         toast.error("Please upload a valid image (JPG or PNG).");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
         toast.error("Image size must be less than 5MB.");
         return;
       }
@@ -234,7 +277,8 @@ const ProfileDetail = () => {
         toast.error("Please upload a valid PDF file.");
         return;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit for CV
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit for CV
         toast.error("CV file size must be less than 10MB.");
         return;
       }
@@ -297,9 +341,13 @@ const ProfileDetail = () => {
         toast.success("CV uploaded successfully!");
       }
 
-      const positionUuid = positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
+      const positionUuid =
+        positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
       const skillUuids = data.skills
-        .map((skillName) => skillsData?.find((skill) => skill.skillName === skillName)?.uuid)
+        .map(
+          (skillName) =>
+            skillsData?.find((skill) => skill.skillName === skillName)?.uuid
+        )
         .filter(Boolean);
 
       const jsonBody = {
@@ -316,7 +364,10 @@ const ProfileDetail = () => {
       };
 
       console.log("Submitting user update JSON:", jsonBody);
-      const updateResult = await updateUser({ userId, body: jsonBody }).unwrap();
+      const updateResult = await updateUser({
+        userId,
+        body: jsonBody,
+      }).unwrap();
       console.log("User update successful:", updateResult);
       toast.success("Profile updated successfully!");
 
@@ -331,17 +382,36 @@ const ProfileDetail = () => {
         toast.success("CV saved successfully!");
       }
     } catch (error) {
-      console.error("Error:", error, "Status:", error.status, "Data:", error.data);
+      console.error(
+        "Error:",
+        error,
+        "Status:",
+        error.status,
+        "Data:",
+        error.data
+      );
       if (error.status === "PARSING_ERROR") {
-        toast.error("Server error: " + (error.data || "Invalid response from server. Contact support."));
+        toast.error(
+          "Server error: " +
+            (error.data || "Invalid response from server. Contact support.")
+        );
       } else if (error.status === 400) {
-        toast.error("Invalid request: " + (error.data?.message || "Please check your input or file and try again."));
+        toast.error(
+          "Invalid request: " +
+            (error.data?.message ||
+              "Please check your input or file and try again.")
+        );
       } else if (error.status === 401) {
         toast.error("Unauthorized. Please log in again.");
       } else if (error.status === 403) {
-        toast.error("Permission denied. Check your account permissions or contact support.");
+        toast.error(
+          "Permission denied. Check your account permissions or contact support."
+        );
       } else {
-        toast.error("Failed to update profile or CV: " + (error.data?.message || "Please try again."));
+        toast.error(
+          "Failed to update profile or CV: " +
+            (error.data?.message || "Please try again.")
+        );
       }
     }
   };
@@ -376,7 +446,12 @@ const ProfileDetail = () => {
     console.log("Errors:", { userError, positionsError, skillsError, cvError });
     return (
       <div className="text-center p-8 text-red-500">
-        Error loading data: {userError?.data?.message || positionsError?.data?.message || skillsError?.data?.message || cvError?.data?.message || "Please try again."}
+        Error loading data:{" "}
+        {userError?.data?.message ||
+          positionsError?.data?.message ||
+          skillsError?.data?.message ||
+          cvError?.data?.message ||
+          "Please try again."}
       </div>
     );
   }
@@ -493,7 +568,10 @@ const ProfileDetail = () => {
                     value=""
                     onChange={(e) => {
                       const selectedSkill = e.target.value;
-                      if (selectedSkill && !field.value.includes(selectedSkill)) {
+                      if (
+                        selectedSkill &&
+                        !field.value.includes(selectedSkill)
+                      ) {
                         const updatedSkills = [...field.value, selectedSkill];
                         field.onChange(updatedSkills);
                       }
@@ -512,7 +590,9 @@ const ProfileDetail = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            const newSkills = field.value.filter((s) => s !== skill);
+                            const newSkills = field.value.filter(
+                              (s) => s !== skill
+                            );
                             field.onChange(newSkills);
                           }}
                           className="ml-2 text-[#1A5276] hover:text-[#149AC5]"
@@ -536,7 +616,6 @@ const ProfileDetail = () => {
             />
           </div>
         </div>
-
         {/* Upload CV */}
         <div className="pt-4">
           <h2 className="text-xl font-medium text-[#1A5276] mb-3">Upload CV</h2>
@@ -551,7 +630,6 @@ const ProfileDetail = () => {
             />
             <label
               htmlFor="cvUpload"
-              onClick={triggerCVInput}
               className="flex flex-col items-center justify-center text-[#1A5276] cursor-pointer"
             >
               <FiUploadCloud className="w-5 h-5 mb-2" />
@@ -571,17 +649,20 @@ const ProfileDetail = () => {
             </button>
           </div>
         </div>
-
         {/* Save Button */}
         <div className="pt-6">
           <button
             type="submit"
             disabled={isUpdating || isUploadingMedia || isCreatingCV}
             className={`w-full py-2 bg-[#1A5276] text-white font-semibold text-lg rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-4 focus:ring-[#149AC5] transition duration-150 ease-in-out ${
-              isUpdating || isUploadingMedia || isCreatingCV ? "opacity-50 cursor-not-allowed" : ""
+              isUpdating || isUploadingMedia || isCreatingCV
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
-            {isUpdating || isUploadingMedia || isCreatingCV ? "Saving..." : "Save changes"}
+            {isUpdating || isUploadingMedia || isCreatingCV
+              ? "Saving..."
+              : "Save changes"}
           </button>
         </div>
       </form>
