@@ -30,6 +30,15 @@ const jobApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    // Apply for a job
+    applyForJob: build.mutation({
+      query: ({ userUuid, jobUuid, cvUuid, coverLetterUrl = null }) => ({
+        url: "/applications",
+        method: "POST",
+        body: { userUuid, jobUuid, cvUuid, coverLetterUrl },
+      }),
+      invalidatesTags: ["User"], // Optional: Invalidate user data if application history is tied to user
+    }),
   }),
 });
 
@@ -37,5 +46,6 @@ export const {
   useGetAllJobsQuery,
   useGetPaginatedJobsQuery,
   useGetLatestJobsQuery,
-  useGetJobByIdQuery, // Export the new hook
+  useGetJobByIdQuery,
+  useApplyForJobMutation,
 } = jobApi;

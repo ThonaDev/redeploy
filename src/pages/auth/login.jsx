@@ -9,10 +9,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRegisterMutation, useLoginMutation } from "../../features/api/apiSlice";
+import { useLoginMutation } from "../../features/api/apiSlice";
 import { setCredentials } from "../../features/auth/authSlide";
 import { useAppDispatch } from "../../store";
-import { storeAccessToken, storeRefreshToken, generateSecurePassword } from "../../utils/tokenUtils";
+import { storeAccessToken, storeRefreshToken } from "../../utils/tokenUtils";
 import {
   GithubAuthProvider,
   GoogleAuthProvider,
@@ -45,7 +45,6 @@ export default function Login() {
   const [isSocialLoading, setIsSocialLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [registerUser] = useRegisterMutation();
   const [login, { isLoading: isSubmitting }] = useLoginMutation();
 
   const {
@@ -94,26 +93,31 @@ export default function Login() {
           ? new GithubAuthProvider()
           : new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const { email, displayName } = result.user;
-      const name = displayName || email.split("@")[0];
-      const socialPassword = generateSecurePassword();
+      const { email } = result.user;
 
-      const registerPayload = { name, email, password: socialPassword };
-      await registerUser(registerPayload).unwrap();
-      const loginPayload = { email, password: socialPassword };
+      // Attempt to log in with the email (assuming the user already exists)
+      // You may need a backend endpoint to map social login to existing accounts
+      toast.info("Attempting to log in with social account...", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+
+      // Note: This assumes your backend has an endpoint to handle social login
+      // Replace with actual login logic for social accounts
+      const loginPayload = { email, socialProvider: providerType };
       const loginResponse = await login(loginPayload).unwrap();
 
       dispatch(
         setCredentials({
           accessToken: loginResponse.data.accessToken,
           refreshToken: loginResponse.data.refreshToken,
-          user: { name, email },
+          user: { email },
         })
       );
       storeAccessToken(loginResponse.data.accessToken);
       storeRefreshToken(loginResponse.data.refreshToken);
 
-      toast.success("✅ Account created and logged in!", {
+      toast.success("✅ Logged in successfully!", {
         position: "top-center",
         autoClose: 2500,
       });
@@ -127,17 +131,12 @@ export default function Login() {
           `Email already used with ${methods.join(", ")}. Please login with that provider.`,
           { position: "top-center", autoClose: 5000 }
         );
-      } else if (error?.data?.status === 500) {
+      } else {
         toast.error(
-          "This email is already registered. Please use normal login.",
+          `🚨 ${providerType} login failed. Please ensure your account exists or register first.`,
           { position: "top-center", autoClose: 5000 }
         );
-        navigate("/login");
-      } else {
-        toast.error(`🚨 ${providerType} login failed`, {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        navigate("/register");
       }
     } finally {
       setIsSocialLoading(false);
@@ -208,7 +207,7 @@ export default function Login() {
                 className="absolute top-10 right-3 text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <FaEye size={18} /> : <FaEyeSlash  size={18} />}
+                {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
               </button>
               {errors.password && (
                 <p className="text-red-600 text-sm mt-1">
@@ -229,7 +228,7 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSocialLoading}
               className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50"
             >
               {isSubmitting ? "Logging In..." : "Login"}

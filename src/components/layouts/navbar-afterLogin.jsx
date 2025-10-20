@@ -30,6 +30,7 @@ const NavBar = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const profileRef = useRef(null);
   const searchRef = useRef(null);
+  const suggestionRef = useRef(null); // New ref for suggestion dropdown
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [logout] = useLogoutMutation();
@@ -43,11 +44,17 @@ const NavBar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target)
+      ) {
+        console.log("Clicked outside search and suggestions, closing suggestions"); // Debug
+        setShowSuggestions(false);
+      }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setProfileOpen(false);
-      }
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSuggestions(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -81,7 +88,7 @@ const NavBar = () => {
         }
       });
 
-      const suggestionArray = [...uniqueSuggestions].slice(0, 5); // Limit to 5 suggestions
+      const suggestionArray = [...uniqueSuggestions].slice(0, 5);
       setSuggestions(suggestionArray);
       setShowSuggestions(suggestionArray.length > 0);
     } else {
@@ -98,13 +105,12 @@ const NavBar = () => {
 
   const handleLogout = async () => {
     try {
-      // await logout().unwrap();
       await signOut(auth);
       dispatch(clearCredentials());
       clearTokens();
       toast.success("Logged out successfully!", {
         position: "top-center",
-        autoClose: 2500,
+        autoClose: 1000,
       });
       navigate("/");
     } catch (error) {
@@ -120,21 +126,26 @@ const NavBar = () => {
   };
 
   const handleSearch = (query = searchQuery) => {
+    console.log("handleSearch called with query:", query); // Debug
     if (query.trim()) {
       navigate(`/jobs?query=${encodeURIComponent(query)}`);
       setSearchQuery("");
       setShowSuggestions(false);
-      setOpen(false); // Close mobile menu
+      setOpen(false);
     }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
+      console.log("Enter key pressed with query:", searchQuery); // Debug
       handleSearch();
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = (e, suggestion) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Suggestion clicked:", suggestion); // Debug
     setSearchQuery(suggestion);
     handleSearch(suggestion);
   };
@@ -186,11 +197,15 @@ const NavBar = () => {
             />
           </div>
           {showSuggestions && (
-            <div className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+            <div
+              ref={suggestionRef}
+              className="absolute z-30 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto pointer-events-auto"
+            >
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  onClick={() => handleSuggestionClick(suggestion)}
+                  onClick={(e) => handleSuggestionClick(e, suggestion)}
+                  onMouseDown={(e) => e.stopPropagation()} // Prevent mousedown from closing dropdown
                   className="p-3 hover:bg-gray-100 cursor-pointer text-[#1A5276]"
                 >
                   {suggestion}
@@ -306,11 +321,15 @@ const NavBar = () => {
               />
             </div>
             {showSuggestions && (
-              <div className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+              <div
+                ref={suggestionRef}
+                className="absolute z-30 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto pointer-events-auto"
+              >
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
+                    onClick={(e) => handleSuggestionClick(e, suggestion)}
+                    onMouseDown={(e) => e.stopPropagation()}
                     className="p-3 hover:bg-gray-100 cursor-pointer text-[#1A5276]"
                   >
                     {suggestion}

@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
 import { FiMapPin } from "react-icons/fi";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useGetUserQuery } from "../../../features/api/apiSlice";
 import { ToastContainer, toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const SingleJobCard = ({
   jobTitle,
@@ -14,6 +13,7 @@ const SingleJobCard = ({
   salary,
   Photos,
   jobUuid,
+  onApplyClick,
 }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -38,9 +38,24 @@ const SingleJobCard = ({
   const isLoggedIn = isAuthenticated && accessToken && isSuccess && !isError;
   const navigate = useNavigate();
 
+  const handleApplyClick = (e) => {
+    e.preventDefault(); // Prevent NavLink navigation
+    if (isLoggedIn) {
+      onApplyClick(jobUuid);
+    } else {
+      toast.error("Please login to apply for a job!", {
+        position: "top-center",
+        autoClose: 3000,
+        onClose: () => {
+          navigate("/login");
+        },
+      });
+    }
+  };
+
   return (
     <NavLink
-      to={`/job-details/${jobUuid}`} // Fixed the to prop
+      to={`/job-details/${jobUuid}`}
       className="bg-white rounded-[10px] w-full max-w-xs sm:max-w-md overflow-hidden
                  transition-all duration-300 ease-in-out 
                  outline-gray-200 hover:ring-1 hover:ring-[#1A5276]/50 hover:ring-offset-2"
@@ -81,24 +96,12 @@ const SingleJobCard = ({
           <span className="text-xl font-semibold text-[#1A5276]">
             {salary}$
           </span>
-          <NavLink
-            to={isLoggedIn ? "/apply" : "/login"}
-            onClick={(e) => {
-              if (!isLoggedIn) {
-                e.preventDefault(); // stop navigation
-                toast.error("Please login to apply for a job!", {
-                  position: "top-center",
-                  autoClose: 3000,
-                  onClose: () => {
-                    navigate("/login");
-                  },
-                });
-              }
-            }}
+          <button
+            onClick={handleApplyClick}
             className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm cursor-pointer"
           >
             Apply
-          </NavLink>
+          </button>
         </div>
       </div>
       <ToastContainer />

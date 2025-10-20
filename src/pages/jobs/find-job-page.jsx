@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 import SingleJobCard from '../../components/card/jobs/single-job-card';
+import ApplyJob from './applying-page';
 import { useGetAllJobsQuery, useGetPaginatedJobsQuery, useGetLatestJobsQuery } from '../../features/job/jobSlice';
 import { useLocation } from 'react-router-dom';
 
@@ -67,6 +68,7 @@ const FindJobPage = () => {
   const [latestJobs, setLatestJobs] = useState([]);
   const [allJobContent, setAllJobContent] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [filteredPage, setFilteredPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [categories, setCategories] = useState(['All Categories']);
   const [experiences, setExperiences] = useState(['All Experiences']);
@@ -79,14 +81,21 @@ const FindJobPage = () => {
   const [selectedSalary, setSelectedSalary] = useState('');
   const [selectedWorkingTime, setSelectedWorkingTime] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedJobUuid, setSelectedJobUuid] = useState(null);
+  const pageSize = 6;
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const query = queryParams.get('query');
 
   const { data: allJobsData, isLoading: allJobsLoading, error: allJobsError } = useGetAllJobsQuery();
-  const { data: paginatedJobsData, isLoading: paginatedJobsLoading, error: paginatedJobsError } = useGetPaginatedJobsQuery({ pageNumber: currentPage, pageSize: 6 });
+  const { data: paginatedJobsData, isLoading: paginatedJobsLoading, error: paginatedJobsError } = useGetPaginatedJobsQuery({ pageNumber: currentPage, pageSize });
   const { data: latestJobsData, isLoading: latestJobsLoading, error: latestJobsError } = useGetLatestJobsQuery();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const query = queryParams.get('query') || '';
+    console.log("URL query:", query);
+    setSearchTerm(query.trim().toLowerCase());
+  }, [location.search]);
 
   useEffect(() => {
     if (allJobsError || paginatedJobsError || latestJobsError) {
@@ -133,13 +142,8 @@ const FindJobPage = () => {
   }, [allJobsData, paginatedJobsData, latestJobsData, allJobsError, paginatedJobsError, latestJobsError]);
 
   useEffect(() => {
-    if (query && allJobContent.length > 0) {
-      const trimmed = query.trim().toLowerCase();
-      setSearchTerm(trimmed);
-    } else {
-      setSearchTerm('');
-    }
-  }, [query, allJobContent]);
+    setFilteredPage(0);
+  }, [selectedCategory, selectedExperience, selectedLocation, selectedSalary, selectedWorkingTime, searchTerm]);
 
   const filteredJobs = allJobContent.filter(job => {
     const matchesCategory = !selectedCategory || job.jobTitle === selectedCategory;
@@ -150,12 +154,11 @@ const FindJobPage = () => {
     const matchesSalary = !selectedSalary || job.salary === parseInt(selectedSalary);
     const matchesWorkingTime = !selectedWorkingTime || job.workingTime === selectedWorkingTime;
 
-    // Partial, case-insensitive search across all fields
     const lowerSearchTerm = searchTerm.toLowerCase();
     const matchesSearch = !searchTerm ||
-      job.jobTitle.toLowerCase().includes(lowerSearchTerm) ||
-      job.location.toLowerCase().includes(lowerSearchTerm) ||
-      job.workingTime.toLowerCase().includes(lowerSearchTerm) ||
+      job.jobTitle?.toLowerCase().includes(lowerSearchTerm) ||
+      job.location?.toLowerCase().includes(lowerSearchTerm) ||
+      job.workingTime?.toLowerCase().includes(lowerSearchTerm) ||
       (job.requirementExperience === 0 && 'no experience'.includes(lowerSearchTerm)) ||
       (typeof job.requirementExperience === 'number' && `${job.requirementExperience} year`.includes(lowerSearchTerm)) ||
       (typeof job.salary === 'number' && `${job.salary}`.includes(lowerSearchTerm));
@@ -163,18 +166,45 @@ const FindJobPage = () => {
     return matchesCategory && matchesExperience && matchesLocation && matchesSalary && matchesWorkingTime && matchesSearch;
   });
 
+  const isFiltered = selectedCategory || selectedExperience || selectedLocation || selectedSalary || selectedWorkingTime || searchTerm;
+  const jobsToDisplay = isFiltered ? filteredJobs : jobs;
+
+  const displayedJobs = isFiltered
+    ? jobsToDisplay.slice(filteredPage * pageSize, (filteredPage + 1) * pageSize)
+    : jobsToDisplay;
+
+  const displayTotalPages = isFiltered ? Math.ceil(jobsToDisplay.length / pageSize) : totalPages;
+  const displayCurrentPage = isFiltered ? filteredPage : currentPage;
+
   const handlePageChange = (page) => {
-    if (page >= 0 && page < totalPages) {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isFiltered) {
+      if (page >= 0 && page < displayTotalPages) {
+        setFilteredPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      if (page >= 0 && page < displayTotalPages) {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
+  };
+
+  const handleApplyClick = (jobUuid) => {
+    setSelectedJobUuid(jobUuid);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsApplyModalOpen(false);
+    setSelectedJobUuid(null);
   };
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
-    let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
+    let startPage = Math.max(0, displayCurrentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(displayTotalPages - 1, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage < maxPagesToShow - 1) {
       startPage = Math.max(0, endPage - maxPagesToShow + 1);
@@ -191,11 +221,11 @@ const FindJobPage = () => {
       pageNumbers.push(i);
     }
 
-    if (endPage < totalPages - 1) {
-      if (endPage < totalPages - 2) {
+    if (endPage < displayTotalPages - 1) {
+      if (endPage < displayTotalPages - 2) {
         pageNumbers.push('...');
       }
-      pageNumbers.push(totalPages - 1);
+      pageNumbers.push(displayTotalPages - 1);
     }
 
     return pageNumbers;
@@ -208,9 +238,6 @@ const FindJobPage = () => {
       </div>
     );
   }
-
-  const isFiltered = selectedCategory || selectedExperience || selectedLocation || selectedSalary || selectedWorkingTime || searchTerm;
-  const jobsToDisplay = isFiltered ? filteredJobs : jobs;
 
   return (
     <div className="min-h-screen font-sans mx-[105px] mt-12">
@@ -243,8 +270,8 @@ const FindJobPage = () => {
       </section>
       <section className="max-w-7xl mx-auto mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer">
-          {jobsToDisplay.length > 0 ? (
-            jobsToDisplay.map((job) => (
+          {displayedJobs.length > 0 ? (
+            displayedJobs.map((job) => (
               <SingleJobCard
                 key={job.uuid}
                 jobUuid={job.uuid}
@@ -253,6 +280,7 @@ const FindJobPage = () => {
                 location={job.location}
                 salary={job.salary}
                 Photos={job.jobPhotos}
+                onApplyClick={handleApplyClick}
               />
             ))
           ) : (
@@ -262,13 +290,13 @@ const FindJobPage = () => {
           )}
         </div>
       </section>
-      {!isFiltered && totalPages > 1 && (
+      {displayTotalPages > 1 && (
         <div className="flex items-center justify-center space-x-2 mt-8 mb-12">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 0}
+            onClick={() => handlePageChange(displayCurrentPage - 1)}
+            disabled={displayCurrentPage === 0}
             className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
-              currentPage === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
+              displayCurrentPage === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
             }`}
           >
             Previous
@@ -278,17 +306,17 @@ const FindJobPage = () => {
               key={index}
               onClick={() => typeof page === 'number' && handlePageChange(page)}
               className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
-                page === '...' ? 'text-[#1A5276] cursor-default' : currentPage === page ? 'bg-[#1A5276] text-white' : 'text-[#1A5276] hover:bg-gray-200'
+                page === '...' ? 'text-[#1A5276] cursor-default' : displayCurrentPage === page ? 'bg-[#1A5276] text-white' : 'text-[#1A5276] hover:bg-gray-200'
               }`}
             >
               {page === '...' ? page : page + 1}
             </button>
           ))}
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages - 1}
+            onClick={() => handlePageChange(displayCurrentPage + 1)}
+            disabled={displayCurrentPage === displayTotalPages - 1}
             className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
-              currentPage === totalPages - 1 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
+              displayCurrentPage === displayTotalPages - 1 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
             }`}
           >
             Next
@@ -308,6 +336,7 @@ const FindJobPage = () => {
                 location={job.location}
                 salary={job.salary}
                 Photos={job.jobPhotos}
+                onApplyClick={handleApplyClick}
               />
             ))
           ) : (
@@ -315,6 +344,9 @@ const FindJobPage = () => {
           )}
         </div>
       </section>
+      {isApplyModalOpen && (
+        <ApplyJob jobUuid={selectedJobUuid} onClose={handleCloseModal} />
+      )}
     </div>
   );
 };

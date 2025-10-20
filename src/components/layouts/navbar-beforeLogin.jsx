@@ -9,6 +9,7 @@ const Nav = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
+  const suggestionRef = useRef(null); // New ref for suggestion dropdown
   const navigate = useNavigate();
   const { data: allJobsData, isLoading: allJobsLoading } = useGetAllJobsQuery();
 
@@ -21,7 +22,13 @@ const Nav = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target)
+      ) {
+        console.log("Clicked outside search and suggestions, closing suggestions"); // Debug
         setShowSuggestions(false);
       }
     };
@@ -56,7 +63,7 @@ const Nav = () => {
         }
       });
 
-      const suggestionArray = [...uniqueSuggestions].slice(0, 5); // Limit to 5 suggestions
+      const suggestionArray = [...uniqueSuggestions].slice(0, 5);
       setSuggestions(suggestionArray);
       setShowSuggestions(suggestionArray.length > 0);
     } else {
@@ -66,6 +73,7 @@ const Nav = () => {
   }, [searchQuery, allJobsData, allJobsLoading]);
 
   const handleSearch = (query = searchQuery) => {
+    console.log("handleSearch called with query:", query); // Debug
     if (query.trim()) {
       navigate(`/jobs?query=${encodeURIComponent(query)}`);
       setSearchQuery("");
@@ -76,11 +84,15 @@ const Nav = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
+      console.log("Enter key pressed with query:", searchQuery); // Debug
       handleSearch();
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
+  const handleSuggestionClick = (e, suggestion) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Suggestion clicked:", suggestion); // Debug
     setSearchQuery(suggestion);
     handleSearch(suggestion);
   };
@@ -127,11 +139,15 @@ const Nav = () => {
             />
           </div>
           {showSuggestions && (
-            <div className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+            <div
+              ref={suggestionRef}
+              className="absolute z-30 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto pointer-events-auto"
+            >
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  onClick={() => handleSuggestionClick(suggestion)}
+                  onClick={(e) => handleSuggestionClick(e, suggestion)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   className="p-3 hover:bg-gray-100 cursor-pointer text-[#1A5276]"
                 >
                   {suggestion}
@@ -192,6 +208,7 @@ const Nav = () => {
             <input
               type="text"
               placeholder="Search"
+ ELECTIONS
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -199,11 +216,15 @@ const Nav = () => {
             />
           </div>
           {showSuggestions && (
-            <div className="absolute z-20 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+            <div
+              ref={suggestionRef}
+              className="absolute z-30 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto pointer-events-auto"
+            >
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  onClick={() => handleSuggestionClick(suggestion)}
+                  onClick={(e) => handleSuggestionClick(e, suggestion)}
+                  onMouseDown={(e) => e.stopPropagation()}
                   className="p-3 hover:bg-gray-100 cursor-pointer text-[#1A5276]"
                 >
                   {suggestion}

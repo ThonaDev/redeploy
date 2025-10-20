@@ -18,7 +18,7 @@ import {
   useUpdateUserMutation,
   useUploadMediaMutation,
   useCreateCVMutation,
-  useGetUserCVsQuery,
+  useGetLatestUserCVQuery,
 } from "../../features/api/apiSlice";
 
 // --- Validation Schema ---
@@ -181,7 +181,7 @@ const ProfileDetail = () => {
     data: latestCV,
     isLoading: cvLoading,
     error: cvError,
-  } = useGetUserCVsQuery(userData?.uuid, {
+  } = useGetLatestUserCVQuery(userData?.uuid, {
     skip: !userData?.uuid, // Skip query until userData is available
   });
 
@@ -324,7 +324,7 @@ const ProfileDetail = () => {
         const uploadResult = await uploadMedia(file).unwrap();
         console.log("Profile photo upload successful:", uploadResult);
         profileUrl = uploadResult.previewLink;
-        toast.success("Profile photo uploaded successfully!");
+        // toast.success("Profile photo uploaded successfully!");
       }
 
       let cvUrl = "";
@@ -642,7 +642,7 @@ const ProfileDetail = () => {
             <button
               type="button"
               onClick={handleViewCV}
-              className="flex items-center justify-center mx-auto px-4 py-2 bg-[#1A5276] text-white font-medium text-md rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-2 focus:ring-[#149AC5] transition duration-150 ease-in-out"
+              className="flex items-center justify-center px-4 py-2 bg-[#1A5276] text-white font-medium text-md rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-2 focus:ring-[#149AC5] transition duration-150 ease-in-out"
             >
               <FiEye className="w-5 h-5 mr-2" />
               View my current CV

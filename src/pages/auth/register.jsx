@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -71,6 +70,7 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function Register() {
+  console.log("Register component rendered"); // Debug log
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState(false);
@@ -97,32 +97,17 @@ export default function Register() {
   const onSubmit = async (data) => {
     try {
       const { name, email, password } = data;
+      console.log("Submitting registration:", { name, email, password }); // Debug log
       const result = await registerUser({ name, email, password }).unwrap();
-      if (result?.data?.accessToken) {
-        storeAccessToken(result.data.accessToken);
-        storeRefreshToken(result.data.refreshToken);
-        dispatch(
-          setCredentials({
-            accessToken: result.data.accessToken,
-            refreshToken: result.data.refreshToken,
-            user: { name, email },
-          })
-        );
-        toast.success("🎉 Registered and logged in successfully!", {
-          position: "top-center",
-          autoClose: 2500,
-        });
-        navigate("/");
-      } else {
-        toast.success(
-          "User registered successfully. Please check your email to verify your account.",
-          { position: "top-center", autoClose: 5000 }
-        );
-        navigate("/login");
-      }
+      console.log("Registration result:", result); // Debug log
+      toast.success("Please check your email to verify your registration", {
+        position: "top-center",
+        autoClose: 5000,
+      });
       reset();
+      setTimeout(() => navigate("/login"), 5100); // Delay navigation
     } catch (err) {
-      console.error("❌ Registration failed:", err);
+      console.error("❌ Registration failed:", err, err?.data, err?.status); // Debug log
       toast.error(
         err?.data?.message || "Registration failed! Please try again.",
         {
@@ -147,27 +132,52 @@ export default function Register() {
       const socialPassword = generateSecurePassword();
 
       const registerPayload = { name, email, password: socialPassword };
+      console.log("Registering social user:", registerPayload); // Debug log
       await registerUser(registerPayload).unwrap();
-      const loginPayload = { email, password: socialPassword };
-      const loginResponse = await login(loginPayload).unwrap();
 
-      dispatch(
-        setCredentials({
-          accessToken: loginResponse.data.accessToken,
-          refreshToken: loginResponse.data.refreshToken,
-          user: { name, email },
-        })
+      toast.success(
+        "Account created! Please check your email to verify your registration. Logging in shortly...",
+        {
+          position: "top-center",
+          autoClose: 60000,
+        }
       );
-      storeAccessToken(loginResponse.data.accessToken);
-      storeRefreshToken(loginResponse.data.refreshToken);
 
-      toast.success("✅ Account created and logged in!", {
-        position: "top-center",
-        autoClose: 2500,
-      });
-      navigate("/");
+      setTimeout(async () => {
+        try {
+          const loginPayload = { email, password: socialPassword };
+          console.log("Attempting social login:", loginPayload); // Debug log
+          const loginResponse = await login(loginPayload).unwrap();
+
+          dispatch(
+            setCredentials({
+              accessToken: loginResponse.data.accessToken,
+              refreshToken: loginResponse.data.refreshToken,
+              user: { name, email },
+            })
+          );
+          storeAccessToken(loginResponse.data.accessToken);
+          storeRefreshToken(loginResponse.data.refreshToken);
+
+          toast.success("✅ Logged in successfully!", {
+            position: "top-center",
+            autoClose: 2500,
+          });
+          navigate("/");
+        } catch (loginError) {
+          console.error("Social login error:", loginError); // Debug log
+          toast.error(
+            "🚨 Login failed after registration. Please try logging in manually.",
+            {
+              position: "top-center",
+              autoClose: 5000,
+            }
+          );
+          navigate("/login");
+        }
+      }, 60000);
     } catch (error) {
-      console.error(`${providerType} login error:`, error);
+      console.error(`${providerType} login error:`, error, error?.data, error?.code); // Debug log
       if (error.code === "auth/account-exists-with-different-credential") {
         const email = error.customData?.email;
         const methods = await fetchSignInMethodsForEmail(auth, email);
@@ -175,7 +185,7 @@ export default function Register() {
           `Email already used with ${methods.join(", ")}. Please login with that provider.`,
           { position: "top-center", autoClose: 5000 }
         );
-      } else if (error?.data?.status === 500) {
+      } else if (error?.data?.status === 500 || error?.data?.message?.includes("already registered")) {
         toast.error(
           "This email is already registered. Please use normal login.",
           { position: "top-center", autoClose: 5000 }
@@ -309,7 +319,7 @@ export default function Register() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isSocialLoading}
                 className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50"
               >
                 {isLoading ? "Registering..." : "Register"}
@@ -346,9 +356,25 @@ export default function Register() {
                 Login
               </button>
             </p>
+
+            {/* Test button for toast */}
+            <button
+              onClick={() => toast.success("Test toast", { position: "top-center" })}
+              className="mt-4 p-2 bg-blue-500 text-white rounded"
+            >
+              Test Toast
+            </button>
           </div>
         </div>
-        <ToastContainer />
+        <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="light"
+        />
       </div>
     </ErrorBoundary>
   );

@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useGetLatestJobsQuery } from "../../features/job/jobSlice";
 import SingleJobCard from "../../components/card/jobs/single-job-card";
-import { NavLink } from "react-router";
+import ApplyJob from "./applying-page";
+import { NavLink } from "react-router-dom";
 
-// Simple Error Boundary Component
 class ErrorBoundary extends React.Component {
   state = { hasError: false };
 
@@ -29,13 +29,23 @@ class ErrorBoundary extends React.Component {
 
 export default function FeatureJob() {
   const { data, isLoading, isError, error } = useGetLatestJobsQuery();
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [selectedJobUuid, setSelectedJobUuid] = useState(null);
 
   console.log("API Response:", data);
 
-  // Ensure safe access to job list
   const latestJobs = data?.data?.content || [];
 
-  // --- Loading State ---
+  const handleApplyClick = (jobUuid) => {
+    setSelectedJobUuid(jobUuid);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsApplyModalOpen(false);
+    setSelectedJobUuid(null);
+  };
+
   if (isLoading)
     return (
       <div className="text-center py-10 text-[#1A5276] font-medium text-lg">
@@ -43,7 +53,6 @@ export default function FeatureJob() {
       </div>
     );
 
-  // --- Error State ---
   if (isError)
     return (
       <div className="text-center py-10 text-red-600 text-lg font-medium">
@@ -52,11 +61,9 @@ export default function FeatureJob() {
       </div>
     );
 
-  // --- Main Section ---
   return (
     <ErrorBoundary>
       <section className="max-w-7xl mx-auto mb-16 px-4 font-poppins">
-        {/* Title */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-[32px] font-semibold text-[#1A5276] mb-2">
             Featured Jobs
@@ -65,8 +72,6 @@ export default function FeatureJob() {
             Freshly released job applications
           </p>
         </div>
-
-        {/* Jobs Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 place-items-center cursor-pointer">
           {latestJobs.length > 0 ? (
             latestJobs.map((job) => (
@@ -78,6 +83,7 @@ export default function FeatureJob() {
                 location={job.location}
                 salary={job.salary}
                 Photos={job.jobPhotos || []}
+                onApplyClick={handleApplyClick}
               />
             ))
           ) : (
@@ -86,8 +92,6 @@ export default function FeatureJob() {
             </p>
           )}
         </div>
-
-        {/* CTA Button */}
         <div className="text-center mt-12">
           <NavLink
             to="/jobs"
@@ -96,6 +100,9 @@ export default function FeatureJob() {
             Find More Jobs →
           </NavLink>
         </div>
+        {isApplyModalOpen && (
+          <ApplyJob jobUuid={selectedJobUuid} onClose={handleCloseModal} />
+        )}
       </section>
     </ErrorBoundary>
   );

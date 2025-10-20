@@ -195,12 +195,21 @@ export const apiSlice = createApi({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const cvs = response.data.content;
-        // Sort by uploadedAt to get the latest CV
-        const latestCV = cvs.sort((a, b) => 
-          new Date(b.uploadedAt) - new Date(a.uploadedAt)
-        )[0];
-        return latestCV || null; // Return latest CV or null if none exist
+        const cvs = response.data.content || [];
+        return {
+          content: cvs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).slice(0, 3),
+        };
+      },
+      providesTags: ["CV"],
+    }),
+    getLatestUserCV: build.query({
+      query: (userId) => ({
+        url: `/cvs/user/${userId}?pageNumber=0&pageSize=1`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const cvs = response.data.content || [];
+        return cvs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0] || null;
       },
       providesTags: ["CV"],
     }),
@@ -219,4 +228,5 @@ export const {
   useUploadMediaMutation,
   useCreateCVMutation,
   useGetUserCVsQuery,
+  useGetLatestUserCVQuery,
 } = apiSlice;
