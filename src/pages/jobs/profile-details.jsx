@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation } from "../../features/api/apiSlice";
+import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation, useCreateCVMutation } from "../../features/api/apiSlice";
 
 // --- Validation Schema ---
 const profileSchema = z.object({
@@ -147,6 +147,7 @@ const ProfileDetail = () => {
   const { data: skillsData, isLoading: skillsLoading, error: skillsError } = useGetSkillsQuery();
   const [updateUser, { isLoading: isUpdating, error: updateError }] = useUpdateUserMutation();
   const [uploadMedia, { isLoading: isUploadingMedia, error: uploadError }] = useUploadMediaMutation();
+  const [createCV, { isLoading: isCreatingCV, error: createCVError }] = useCreateCVMutation();
 
   const { control, register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(profileSchema),
@@ -163,6 +164,7 @@ const ProfileDetail = () => {
 
   const [profileImage, setProfileImage] = useState("https://placehold.co/200x200");
   const [hasFallback, setHasFallback] = useState(false);
+  const [cvFileName, setCvFileName] = useState(null);
 
   useEffect(() => {
     if (userData) {
@@ -199,6 +201,14 @@ const ProfileDetail = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        toast.error("Please upload a valid image (JPG or PNG).");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error("Image size must be less than 5MB.");
+        return;
+      }
       const newImageUrl = URL.createObjectURL(file);
       setProfileImage(newImageUrl);
       setHasFallback(false);
@@ -206,11 +216,28 @@ const ProfileDetail = () => {
   };
 
   const handleCVChange = (e) => {
-    // Skipped for now
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        toast.error("Please upload a valid PDF file.");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit for CV
+        toast.error("CV file size must be less than 10MB.");
+        return;
+      }
+      setCvFileName(file.name);
+    } else {
+      setCvFileName(null);
+    }
   };
 
   const triggerFileInput = () => {
     fileInputRef.current.click();
+  };
+
+  const triggerCVInput = () => {
+    cvInputRef.current.click();
   };
 
   const onSubmit = async (data) => {
@@ -224,11 +251,21 @@ const ProfileDetail = () => {
       let profileUrl = userData?.profile || "";
       if (fileInputRef.current?.files[0]) {
         const file = fileInputRef.current.files[0];
-        console.log("Uploading file:", file.name);
+        console.log("Uploading profile photo:", file.name);
         const uploadResult = await uploadMedia(file).unwrap();
-        console.log("Upload successful:", uploadResult);
+        console.log("Profile photo upload successful:", uploadResult);
         profileUrl = uploadResult.previewLink;
-        toast.success("Profile photo uploaded successfully!");
+        // toast.success("Profile photo uploaded successfully!");
+      }
+
+      let cvUrl = "";
+      if (cvInputRef.current?.files[0]) {
+        const file = cvInputRef.current.files[0];
+        console.log("Uploading CV:", file.name);
+        const uploadResult = await uploadMedia(file).unwrap();
+        console.log("CV upload successful:", uploadResult);
+        cvUrl = uploadResult.previewLink;
+        // toast.success("CV uploaded successfully!");
       }
 
       const positionUuid = positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
@@ -249,20 +286,33 @@ const ProfileDetail = () => {
         skillUuids,
       };
 
-      console.log("Submitting JSON:", jsonBody);
+      console.log("Submitting user update JSON:", jsonBody);
       const updateResult = await updateUser({ userId, body: jsonBody }).unwrap();
-      console.log("Update successful:", updateResult);
+      console.log("User update successful:", updateResult);
       toast.success("Profile updated successfully!");
+
+      if (cvUrl) {
+        const cvBody = {
+          userUuid: userId,
+          fileUrl: cvUrl,
+        };
+        console.log("Submitting CV JSON:", cvBody);
+        const cvResult = await createCV(cvBody).unwrap();
+        console.log("CV creation successful:", cvResult);
+        // toast.success("CV saved successfully!");
+      }
     } catch (error) {
       console.error("Error:", error, "Status:", error.status, "Data:", error.data);
-      if (error.status === 401) {
+      if (error.status === "PARSING_ERROR") {
+        toast.error("Server error: " + (error.data || "Invalid response from server. Contact support."));
+      } else if (error.status === 400) {
+        toast.error("Invalid request: " + (error.data?.message || "Please check your input or file and try again."));
+      } else if (error.status === 401) {
         toast.error("Unauthorized. Please log in again.");
       } else if (error.status === 403) {
         toast.error("Permission denied. Check your account permissions or contact support.");
-      } else if (error.status === 400) {
-        toast.error("Invalid request: " + (error.data?.message || "Please check your input and try again."));
       } else {
-        toast.error("Failed to update profile: " + (error.data?.message || "Please try again."));
+        toast.error("Failed to update profile or CV: " + (error.data?.message || "Please try again."));
       }
     }
   };
@@ -337,7 +387,7 @@ const ProfileDetail = () => {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleImageChange}
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 className="hidden"
               />
             </div>
@@ -467,16 +517,18 @@ const ProfileDetail = () => {
               ref={cvInputRef}
               id="cvUpload"
               className="hidden"
-              accept=".pdf"
+              accept="application/pdf"
               onChange={handleCVChange}
-              disabled
             />
             <label
               htmlFor="cvUpload"
-              className="flex flex-col items-center justify-center text-[#1A5276] opacity-50 cursor-not-allowed"
+              onClick={triggerCVInput}
+              className="flex flex-col items-center justify-center text-[#1A5276] cursor-pointer"
             >
               <FiUploadCloud className="w-5 h-5 mb-2" />
-              <span className="font-medium text-md">Upload your CV PDF (Disabled)</span>
+              <span className="font-medium text-md">
+                {cvFileName ? cvFileName : "Upload your CV (PDF)"}
+              </span>
             </label>
           </div>
         </div>
@@ -485,12 +537,12 @@ const ProfileDetail = () => {
         <div className="pt-6">
           <button
             type="submit"
-            disabled={isUpdating || isUploadingMedia}
+            disabled={isUpdating || isUploadingMedia || isCreatingCV}
             className={`w-full py-2 bg-[#1A5276] text-white font-semibold text-lg rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-4 focus:ring-[#149AC5] transition duration-150 ease-in-out ${
-              isUpdating || isUploadingMedia ? "opacity-50 cursor-not-allowed" : ""
+              isUpdating || isUploadingMedia || isCreatingCV ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isUpdating || isUploadingMedia ? "Saving..." : "Save changes"}
+            {isUpdating || isUploadingMedia || isCreatingCV ? "Saving..." : "Save changes"}
           </button>
         </div>
       </form>
