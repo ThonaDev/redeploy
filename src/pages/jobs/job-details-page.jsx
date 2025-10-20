@@ -13,10 +13,12 @@ import { BiPhone } from "react-icons/bi";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { useParams } from "react-router-dom";
 import { useGetJobByIdQuery } from "../../features/job/jobSlice";
+import ApplyJob from "./applying-page";
 
 export default function JobDetail() {
   const { jobUuid } = useParams(); // Get jobUuid from URL
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   // Fetch job details using RTK Query
   const { data: jobData, isLoading, isError } = useGetJobByIdQuery(jobUuid);
@@ -31,6 +33,14 @@ export default function JobDetail() {
 
   const toggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+  };
+
+  const handleApplyClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   const formatSalary = (salary) => {
@@ -79,7 +89,7 @@ export default function JobDetail() {
             {job.jobTitle}
           </h1>
           <button
-            className="text-[#FF6C1A]  text-center"
+            className="text-[#FF6C1A] text-center"
             onClick={toggleBookmark}
           >
             {isBookmarked ? (
@@ -90,7 +100,7 @@ export default function JobDetail() {
           </button>
         </div>
         <div className="flex items-center space-x-4 mb-4">
-          <div className=" p-1 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="p-1 rounded-full flex items-center justify-center flex-shrink-0">
             <img
               src={job.jobPhotos?.[0]?.url || "./google.png"}
               alt="company"
@@ -110,7 +120,7 @@ export default function JobDetail() {
           </div>
         </div>
         {/* Tags (still hardcoded, consider adding a skills field to API) */}
-        <div className="flex flex-wrap items-center space-x-2  hover:text-[#FF7A00]">
+        <div className="flex flex-wrap items-center space-x-2 hover:text-[#FF7A00]">
           <span className="bg-transparent text-orange-400 text-sm font-medium px-2 py-1 rounded-md border border-blue-300 hover:text-[#FF7A00]">
             HTML
           </span>
@@ -128,60 +138,68 @@ export default function JobDetail() {
           </span>
         </div>
         <div className="flex justify-between items-center mt-4 hover:text-[#FF7A00]">
-          <span className="text-[#1A5276] text-lg "> <span>Rating per hour: </span> 
+          <span className="text-[#1A5276] text-lg">
+            <span>Rating per hour: </span>
             <span className="text-[#FF7A00]">{formatSalary(job.salary)}</span>
           </span>
-          <button className="bg-[#1A5276] text-white font-medium text-base px-4 py-1.5 mr-1.2 rounded-full hover:bg-[#149AC5] transition-colors">
+          <button
+            className="bg-[#1A5276] text-white font-medium text-base px-4 py-1.5 mr-1.2 rounded-full hover:bg-[#149AC5] transition-colors"
+            onClick={handleApplyClick}
+          >
             Apply
           </button>
         </div>
       </Card>
       {/* Section 2: Description */}
-      <Card className="w-full max-w-6xl py-6 px-8 rounded-2xl text-start">
-        <h2 className="text-xl font-semibold text-[#1A5276] mb-1">
+      <Card className="w-full max-w-6xl py-6 px-8 rounded-xl text-start">
+        <h2 className="text-2xl font-semibold text-[#1A5276] mb-1">
           Description
         </h2>
-        <p className="text-[#1A5276] leading-relaxed text-base font-regular">
+        <p className="text-[#1A5276] leading-relaxed font-regular text-lg">
           {job.description}
         </p>
       </Card>
       {/* Section 3: Job Requirements and Contact Info */}
-      <Card className="w-full max-w-6xl rounded-2xl">
+      <Card className="w-full max-w-6xl rounded-2xl text-2xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           {/* Column 1: Job Requirements */}
-          <div className="text-start">
-            <h2 className="text-xl font-semibold text-[#1A5276] mb-4">
+          <div className="text-start text-2xl">
+            <h2 className="font-semibold text-[#1A5276] mb-4">
               Job Requirements
             </h2>
             <ul className="list-none text-[#1A5276] space-y-3 mb-8">
               {job.requirements?.map((req, index) => (
                 <li key={index} className="flex items-start text-sm">
-                  <span className="text-[#1A5276] mr-2 text-lg leading-none">
+                  <span className="text-[#1A5276] mr-2 text-3xl leading-none">
                     •
                   </span>
-                  <span>{req.requirement}</span>
+                  <span className="text-lg">{req.requirement}</span>
                 </li>
               ))}
             </ul>
           </div>
           {/* Column 2: Contact Owner */}
           <div className="text-start md:mt-0 mt-8">
-            <h2 className="text-xl font-semibold text-[#1A5276] mb-3">
+            <h2 className="text-2xl font-semibold text-[#1A5276] mb-3">
               Contact Owner
             </h2>
-            <p className="text-sm text-[#1A5276] mb-6">
+            <p className="text-[#1A5276] mb-6 text-lg">
               If you have any questions, please feel free to let us know
             </p>
-            <div className="space-y-4 text-[#1A5276] text-sm">
+            <div className="space-y-4 text-[#1A5276] text-lg">
               {/* Address */}
               <div className="flex items-start space-x-3">
                 <GrLocation className="w-5 h-5 text-[#1A5276] flex-shrink-0" />
                 <address className="not-italic">
                   <a
-                    href="#"
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      job.location
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="underline text-[#1A5276] hover:text-[#FF6C1A] hover:no-underline block"
                   >
-                    <span className="block">{job.location}</span>
+                    {job.location}
                   </a>
                 </address>
               </div>
@@ -219,6 +237,8 @@ export default function JobDetail() {
           </div>
         </div>
       </Card>
+      {/* ApplyJob Modal */}
+      {isModalOpen && <ApplyJob jobUuid={jobUuid} onClose={handleCloseModal} />}
     </div>
   );
 }

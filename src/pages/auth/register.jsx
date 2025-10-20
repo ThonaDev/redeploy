@@ -9,10 +9,17 @@ import JOBCollapLogo from "../../assets/jobCollapLogo.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRegisterMutation, useLoginMutation } from "../../features/api/apiSlice";
+import {
+  useRegisterMutation,
+  useLoginMutation,
+} from "../../features/api/apiSlice";
 import { setCredentials } from "../../features/auth/authSlide";
 import { useAppDispatch } from "../../store";
-import { storeAccessToken, storeRefreshToken, generateSecurePassword } from "../../utils/tokenUtils";
+import {
+  storeAccessToken,
+  storeRefreshToken,
+  generateSecurePassword,
+} from "../../utils/tokenUtils";
 import {
   GithubAuthProvider,
   GoogleAuthProvider,
@@ -102,7 +109,7 @@ export default function Register() {
       console.log("Registration result:", result); // Debug log
       toast.success("Please check your email to verify your registration", {
         position: "top-center",
-        autoClose: 5000,
+        autoClose: 60000,
       });
       reset();
       setTimeout(() => navigate("/login"), 5100); // Delay navigation
@@ -177,15 +184,25 @@ export default function Register() {
         }
       }, 60000);
     } catch (error) {
-      console.error(`${providerType} login error:`, error, error?.data, error?.code); // Debug log
+      console.error(
+        `${providerType} login error:`,
+        error,
+        error?.data,
+        error?.code
+      ); // Debug log
       if (error.code === "auth/account-exists-with-different-credential") {
         const email = error.customData?.email;
         const methods = await fetchSignInMethodsForEmail(auth, email);
         toast.error(
-          `Email already used with ${methods.join(", ")}. Please login with that provider.`,
+          `Email already used with ${methods.join(
+            ", "
+          )}. Please login with that provider.`,
           { position: "top-center", autoClose: 5000 }
         );
-      } else if (error?.data?.status === 500 || error?.data?.message?.includes("already registered")) {
+      } else if (
+        error?.data?.status === 500 ||
+        error?.data?.message?.includes("already registered")
+      ) {
         toast.error(
           "This email is already registered. Please use normal login.",
           { position: "top-center", autoClose: 5000 }
@@ -241,9 +258,9 @@ export default function Register() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Phat Phea"
                   {...register("name")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                  placeholder="Enter full name"
                 />
                 {errors.name && (
                   <p className="text-red-600 text-sm mt-1">
@@ -258,9 +275,9 @@ export default function Register() {
                 </label>
                 <input
                   type="email"
-                  placeholder="phartphea854@gmail.com"
                   {...register("email")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                  placeholder="Enter your email"
                 />
                 {errors.email && (
                   <p className="text-red-600 text-sm mt-1">
@@ -275,16 +292,20 @@ export default function Register() {
                 </label>
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Phat1234#!"
                   {...register("password")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                  placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   className="absolute top-10 right-3 text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                  {showPassword ? (
+                    <FaEye size={18} />
+                  ) : (
+                    <FaEyeSlash size={18} />
+                  )}
                 </button>
                 {errors.password && (
                   <p className="text-red-600 text-sm mt-1">
@@ -299,16 +320,20 @@ export default function Register() {
                 </label>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Phat1234#!"
                   {...register("confirmPassword")}
                   className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                  placeholder="Re-confirm password"
                 />
                 <button
                   type="button"
                   className="absolute top-10 right-3 text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <FaEye size={18} /> : <FaEyeSlash size={18} />}
+                  {showConfirmPassword ? (
+                    <FaEye size={18} />
+                  ) : (
+                    <FaEyeSlash size={18} />
+                  )}
                 </button>
                 {errors.confirmPassword && (
                   <p className="text-red-600 text-sm mt-1">
@@ -320,29 +345,40 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={isLoading || isSocialLoading}
-                className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50"
+                className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50 sm:w-11/12 text-center font-semibold"
               >
                 {isLoading ? "Registering..." : "Register"}
               </button>
             </form>
 
-            <div className="mt-6 text-center w-full">
+            <div className="mt-3 text-center w-full">
               <p className="text-lg mb-3 text-[#1A5276]">Or sign up with</p>
-              <div className="flex justify-center space-x-5 text-3xl">
-                <FaGithub
-                  size={42}
-                  onClick={() => !isSocialLoading && handleSocialLogin("github")}
-                  className={`cursor-pointer text-black hover:scale-110 transition ${
+              <div className="flex justify-center space-x-6">
+                <button
+                  onClick={() =>
+                    !isSocialLoading && handleSocialLogin("github")
+                  }
+                  disabled={isSocialLoading}
+                  className={`flex items-center justify-center space-x-3 py-2 px-2 border border-[#1A5276] rounded-lg text-sm font-medium text-[#1A5276] bg-white hover:bg-gray-50 transition ${
                     isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
                   }`}
-                />
-                <FcGoogle
-                  size={48}
-                  onClick={() => !isSocialLoading && handleSocialLogin("google")}
-                  className={`cursor-pointer hover:scale-110 transition ${
+                >
+                  <FaGithub size={24} className="text-black" />
+                  <span>Sign up with GitHub</span>
+                </button>
+
+                <button
+                  onClick={() =>
+                    !isSocialLoading && handleSocialLogin("google")
+                  }
+                  disabled={isSocialLoading}
+                  className={`flex items-center justify-center space-x-3 py-2 px-2 border border-[#1A5276] rounded-lg text-sm font-medium text-[#1A5276] bg-white hover:bg-gray-50 transition ${
                     isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
                   }`}
-                />
+                >
+                  <FcGoogle size={24} />
+                  <span>Sign up with Google</span>
+                </button>
               </div>
             </div>
 
@@ -356,25 +392,9 @@ export default function Register() {
                 Login
               </button>
             </p>
-
-            {/* Test button for toast */}
-            <button
-              onClick={() => toast.success("Test toast", { position: "top-center" })}
-              className="mt-4 p-2 bg-blue-500 text-white rounded"
-            >
-              Test Toast
-            </button>
           </div>
         </div>
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          closeOnClick
-          pauseOnHover
-          draggable
-          theme="light"
-        />
+        <ToastContainer />
       </div>
     </ErrorBoundary>
   );

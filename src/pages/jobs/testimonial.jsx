@@ -1,6 +1,6 @@
 import React from "react";
 import { BsArrowLeftCircle, BsArrowRightCircle } from "react-icons/bs";
-import image from "../../assets/image.jpg";
+import image from "../../assets/Chansokpheng.jpg";
 
 export default function Testimonial() {
   return (

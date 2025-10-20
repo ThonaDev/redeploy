@@ -5,6 +5,8 @@ import { LiaTelegram } from "react-icons/lia";
 import { AiOutlineYoutube } from "react-icons/ai";
 import { GrLocation } from 'react-icons/gr';
 import { NavLink } from 'react-router-dom';
+import istadLogo from '../../assets/istad.png'; // Import ISTAD logo
+import jobCollabLogo from '../../assets/jobCollapLogo.png'; // Import JOBCOLLAB logo
 
 const Footer = () => {
   return (
@@ -22,7 +24,7 @@ const Footer = () => {
           <div className="flex flex-col items-center text-center">
             <h4 className="font-bold text-lg mb-4 whitespace-nowrap">Organized and Sponsored By</h4>
             <div className="w-24 h-24 sm:w-28 sm:h-28">
-              <img src="ISTAD.png" alt="ISTAD" className="w-full h-full object-contain" />
+              <img src={istadLogo} alt="ISTAD" className="w-full h-full object-contain" />
             </div>
           </div>
 
@@ -30,7 +32,7 @@ const Footer = () => {
           <div className="flex flex-col items-center text-center">
             <h4 className="font-bold text-lg mb-4 whitespace-nowrap">Prepared By</h4>
             <div className="w-32 h-auto sm:w-40">
-              <img src="JOBCOLLAB.png" alt="JOBCOLLAB" className="w-full h-full object-contain" />
+              <img src={jobCollabLogo} alt="JOBCOLLAB" className="w-full h-full object-contain" />
             </div>
           </div>
 

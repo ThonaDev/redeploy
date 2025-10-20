@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGetAllJobsQuery } from "../../features/job/jobSlice";
+import logo from "../../assets/Logo.jpg"; // Import the logo
 
 const Nav = () => {
   const [open, setOpen] = useState(false);
@@ -102,7 +103,7 @@ const Nav = () => {
       <div className="flex items-center">
         <NavLink to="/">
           <img
-            src="src/assets/Logo.jpg"
+            src={logo} // Use imported logo
             alt="JOBCOLLAP Logo"
             className="h-10 md:h-12 mr-4 object-contain"
           />
@@ -208,7 +209,6 @@ const Nav = () => {
             <input
               type="text"
               placeholder="Search"
- ELECTIONS
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}

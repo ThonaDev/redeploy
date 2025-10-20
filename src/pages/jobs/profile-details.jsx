@@ -26,8 +26,9 @@ const profileSchema = z.object({
   fullName: z
     .string()
     .min(3, "Full name must be at least 3 characters")
-    .nonempty("Full name is required"),
-  email: z.string().email("Enter a valid email").nonempty("Email is required"),
+    .optional()
+    .or(z.literal("")),
+  email: z.string().email("Enter a valid email").optional().or(z.literal("")),
   contact: z
     .string()
     .regex(/^\d{9,12}$/, "Contact must be a valid phone number (9-12 digits)")
@@ -50,14 +51,14 @@ const FormInput = ({
 }) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-normal text-[#1A5276] mb-1">
-      {label} <span className="text-red-500">*</span>
+      {label}
     </label>
     <input
       type={type}
       id={id}
       {...register(id)}
       placeholder={placeholder}
-      className={`px-4 py-3 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out hover:border-[#149AC5] ${
+      className={`px-3 py-2 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out hover:border-[#149AC5] ${
         errors[id] ? "border-red-500" : ""
       }`}
     />
@@ -78,7 +79,7 @@ const FormSelect = ({
 }) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-normal text-[#1A5276] mb-1">
-      {label} {multiple ? "" : ""}
+      {label}
     </label>
     <div className="relative">
       <select
@@ -86,7 +87,7 @@ const FormSelect = ({
         multiple={multiple}
         value={value || (multiple ? [] : "")}
         onChange={onChange}
-        className={`appearance-none block w-full px-4 py-3 border border-[#1A5276] rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out cursor-pointer hover:border-[#149AC5] ${
+        className={`appearance-none block w-full px-3 py-2 border border-[#1A5276] rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out cursor-pointer hover:border-[#149AC5] ${
           errors[id] ? "border-red-500" : ""
         } ${multiple ? "h-24" : ""}`}
       >
@@ -139,7 +140,7 @@ const FormTextarea = ({
         rows={rows}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={`px-4 py-3 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out resize-none overflow-hidden hover:border-[#149AC5] ${
+        className={`px-3 py-2 border border-[#1A5276] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1A5276] text-[#1A5276] transition duration-150 ease-in-out resize-none overflow-hidden hover:border-[#149AC5] ${
           errors[id] ? "border-red-500" : ""
         }`}
         style={{ minHeight: `${rows * 1.5}em` }}
@@ -155,6 +156,7 @@ const FormTextarea = ({
 const ProfileDetail = () => {
   const fileInputRef = useRef(null);
   const cvInputRef = useRef(null);
+  const dropZoneRef = useRef(null);
 
   const {
     data: userData,
@@ -182,14 +184,14 @@ const ProfileDetail = () => {
     isLoading: cvLoading,
     error: cvError,
   } = useGetLatestUserCVQuery(userData?.uuid, {
-    skip: !userData?.uuid, // Skip query until userData is available
+    skip: !userData?.uuid,
   });
 
   const {
     control,
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     reset,
   } = useForm({
     resolver: zodResolver(profileSchema),
@@ -209,10 +211,11 @@ const ProfileDetail = () => {
   );
   const [hasFallback, setHasFallback] = useState(false);
   const [cvFileName, setCvFileName] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (userData) {
-      console.log("userData:", userData); // Debug user data
+      console.log("userData:", userData);
       const skills = userData.skills?.map((skill) => skill.skillName) || [];
       const normalizedGender = userData.gender
         ? userData.gender.toLowerCase() === "male"
@@ -245,7 +248,7 @@ const ProfileDetail = () => {
 
   useEffect(() => {
     if (latestCV) {
-      console.log("Latest CV:", latestCV); // Debug latest CV data
+      console.log("Latest CV:", latestCV);
       console.log("CV fileUrl:", latestCV.fileUrl);
     } else if (cvError) {
       console.error("CV fetch error:", cvError);
@@ -260,7 +263,6 @@ const ProfileDetail = () => {
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
         toast.error("Image size must be less than 5MB.");
         return;
       }
@@ -270,21 +272,45 @@ const ProfileDetail = () => {
     }
   };
 
-  const handleCVChange = (e) => {
-    const file = e.target.files[0];
+  const handleCVChange = (file) => {
     if (file) {
       if (file.type !== "application/pdf") {
         toast.error("Please upload a valid PDF file.");
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        // 10MB limit for CV
         toast.error("CV file size must be less than 10MB.");
         return;
       }
       setCvFileName(file.name);
+      cvInputRef.current.files = new DataTransfer().files; // Clear input
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      cvInputRef.current.files = dataTransfer.files; // Assign new file
     } else {
       setCvFileName(null);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleCVChange(file);
     }
   };
 
@@ -324,7 +350,6 @@ const ProfileDetail = () => {
         const uploadResult = await uploadMedia(file).unwrap();
         console.log("Profile photo upload successful:", uploadResult);
         profileUrl = uploadResult.previewLink;
-        // toast.success("Profile photo uploaded successfully!");
       }
 
       let cvUrl = "";
@@ -341,35 +366,55 @@ const ProfileDetail = () => {
         toast.success("CV uploaded successfully!");
       }
 
-      const positionUuid =
-        positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
-      const skillUuids = data.skills
-        .map(
-          (skillName) =>
-            skillsData?.find((skill) => skill.skillName === skillName)?.uuid
-        )
-        .filter(Boolean);
+      // Build JSON body with only changed fields
+      const jsonBody = {};
+      if (dirtyFields.fullName && data.fullName) {
+        jsonBody.name = data.fullName;
+      }
+      if (dirtyFields.email && data.email) {
+        jsonBody.email = data.email;
+      }
+      if (dirtyFields.contact && data.contact) {
+        jsonBody.phoneNumber = data.contact;
+      }
+      if (dirtyFields.jobTitle && data.jobTitle) {
+        const positionUuid =
+          positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
+        jsonBody.positions = positionUuid ? [positionUuid] : [];
+      }
+      if (dirtyFields.gender && data.gender) {
+        jsonBody.gender = data.gender.toUpperCase();
+      }
+      if (dirtyFields.skills && data.skills) {
+        const skillUuids = data.skills
+          .map(
+            (skillName) =>
+              skillsData?.find((skill) => skill.skillName === skillName)?.uuid
+          )
+          .filter(Boolean);
+        jsonBody.skillUuids = skillUuids;
+      }
+      if (dirtyFields.bio && data.bio) {
+        jsonBody.bio = data.bio;
+      }
+      if (profileUrl && profileUrl !== userData?.profile) {
+        jsonBody.profile = profileUrl;
+      }
+      // Always include required fields to avoid breaking the API
+      jsonBody.coverPhoto = userData?.coverPhoto || "";
+      jsonBody.isOtpAuthentication = false;
+      jsonBody.expectedSalary = 0;
 
-      const jsonBody = {
-        name: data.fullName,
-        gender: data.gender.toUpperCase(),
-        profile: profileUrl,
-        coverPhoto: userData?.coverPhoto || "",
-        phoneNumber: data.contact,
-        bio: data.bio,
-        isOtpAuthentication: false,
-        expectedSalary: 0,
-        positions: positionUuid ? [positionUuid] : [],
-        skillUuids,
-      };
-
-      console.log("Submitting user update JSON:", jsonBody);
-      const updateResult = await updateUser({
-        userId,
-        body: jsonBody,
-      }).unwrap();
-      console.log("User update successful:", updateResult);
-      toast.success("Profile updated successfully!");
+      // Only send update if there are changes
+      if (Object.keys(jsonBody).length > 3 || profileUrl !== userData?.profile) {
+        console.log("Submitting user update JSON:", jsonBody);
+        const updateResult = await updateUser({
+          userId,
+          body: jsonBody,
+        }).unwrap();
+        console.log("User update successful:", updateResult);
+        toast.success("Profile updated successfully!");
+      }
 
       if (cvUrl) {
         const cvBody = {
@@ -490,7 +535,7 @@ const ProfileDetail = () => {
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleImageChange}
+                onChange={(e) => handleImageChange(e)}
                 accept="image/jpeg,image/png"
                 className="hidden"
               />
@@ -504,7 +549,7 @@ const ProfileDetail = () => {
               id="fullName"
               register={register}
               errors={errors}
-              placeholder="Phat Phea"
+              placeholder="Full name"
             />
             <FormInput
               label="Email"
@@ -512,14 +557,14 @@ const ProfileDetail = () => {
               type="email"
               register={register}
               errors={errors}
-              placeholder="phartphea854@gmail.com"
+              placeholder="Email"
             />
             <FormInput
               label="Contact"
               id="contact"
               register={register}
               errors={errors}
-              placeholder="0969537167"
+              placeholder="Contact number"
             />
             <Controller
               name="jobTitle"
@@ -575,7 +620,7 @@ const ProfileDetail = () => {
                         const updatedSkills = [...field.value, selectedSkill];
                         field.onChange(updatedSkills);
                       }
-                      e.target.value = ""; // Reset dropdown after selection
+                      e.target.value = "";
                     }}
                     options={skillOptions}
                     errors={errors}
@@ -611,7 +656,7 @@ const ProfileDetail = () => {
               register={register}
               errors={errors}
               rows={1}
-              placeholder="I love coding..."
+              placeholder="Your bio"
               maxLength={200}
             />
           </div>
@@ -619,22 +664,34 @@ const ProfileDetail = () => {
         {/* Upload CV */}
         <div className="pt-4">
           <h2 className="text-xl font-medium text-[#1A5276] mb-3">Upload CV</h2>
-          <div className="border border-[#1A5276] rounded-lg py-2 text-center hover:border-[#149AC5] transition duration-150 ease-in-out">
+          <div
+            ref={dropZoneRef}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed border-[#1A5276] rounded-lg py-6 text-center transition duration-150 ease-in-out ${
+              isDragging
+                ? "bg-[#ECF2FF] border-[#149AC5]"
+                : "hover:border-[#149AC5]"
+            }`}
+          >
             <input
               type="file"
               ref={cvInputRef}
               id="cvUpload"
               className="hidden"
               accept="application/pdf"
-              onChange={handleCVChange}
+              onChange={(e) => handleCVChange(e.target.files[0])}
             />
             <label
               htmlFor="cvUpload"
               className="flex flex-col items-center justify-center text-[#1A5276] cursor-pointer"
             >
-              <FiUploadCloud className="w-5 h-5 mb-2" />
+              <FiUploadCloud className="w-8 h-8 mb-2" />
               <span className="font-medium text-md">
-                {cvFileName ? cvFileName : "Upload your CV (PDF)"}
+                {cvFileName
+                  ? cvFileName
+                  : "Drag and drop your CV here or click to upload (PDF)"}
               </span>
             </label>
           </div>

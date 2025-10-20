@@ -37,12 +37,12 @@ function ContactUs() {
               <ContactDetail
                 icon={<MdOutlineLocalPhone />}
                 label="Phone"
-                value="+855 XXX XXX XXX"
+                value="+855 96 427 9700"
               />
               <ContactDetail
                 icon={<CiLocationOn />}
                 label="Office"
-                value="St 562, Phnom Penh 12151"
+                value="#40, Street 273, Phnom Penh, Cambodia"
               />
             </div>
           </div>

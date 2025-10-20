@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { useGetUserQuery, useGetLatestUserCVQuery } from "../../features/api/apiSlice";
+import {
+  useGetUserQuery,
+  useGetLatestUserCVQuery,
+} from "../../features/api/apiSlice";
 import { useApplyForJobMutation } from "../../features/job/jobSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,11 +14,19 @@ const ApplyJob = ({ jobUuid, onClose }) => {
   const navigate = useNavigate();
 
   // Fetch user data to get user UUID
-  const { data: userData, isLoading: userLoading, error: userError } = useGetUserQuery();
+  const {
+    data: userData,
+    isLoading: userLoading,
+    error: userError,
+  } = useGetUserQuery();
   console.log("userData:", userData);
 
   // Fetch the latest CV
-  const { data: latestCV, isLoading: cvLoading, error: cvError } = useGetLatestUserCVQuery(userData?.uuid, {
+  const {
+    data: latestCV,
+    isLoading: cvLoading,
+    error: cvError,
+  } = useGetLatestUserCVQuery(userData?.uuid, {
     skip: !userData?.uuid,
   });
   console.log("latestCV:", latestCV);
@@ -57,15 +68,20 @@ const ApplyJob = ({ jobUuid, onClose }) => {
     if (!latestCV) {
       setError("⚠️ No CV available. Please upload a CV in your profile first.");
       console.log("No CV data returned from useGetLatestUserCVQuery");
-      toast.error("No CV available. Please upload a CV in your profile first.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      toast.error(
+        "No CV available. Please upload a CV in your profile first.",
+        {
+          position: "top-center",
+          autoClose: 3000,
+        }
+      );
       return;
     }
 
     if (!latestCV.uuid) {
-      setError("⚠️ CV data is invalid (missing ID). Please upload a new CV in your profile.");
+      setError(
+        "⚠️ CV data is invalid (missing ID). Please upload a new CV in your profile."
+      );
       console.log("latestCV exists but missing uuid:", latestCV);
       toast.error("CV data is invalid (missing ID). Please upload a new CV.", {
         position: "top-center",
@@ -75,7 +91,14 @@ const ApplyJob = ({ jobUuid, onClose }) => {
     }
 
     try {
-      console.log("Applying for job UUID:", jobUuid, "with CV UUID:", latestCV.uuid, "user UUID:", userData.uuid);
+      console.log(
+        "Applying for job UUID:",
+        jobUuid,
+        "with CV UUID:",
+        latestCV.uuid,
+        "user UUID:",
+        userData.uuid
+      );
       const result = await applyForJob({
         userUuid: userData.uuid,
         jobUuid,
@@ -101,15 +124,22 @@ const ApplyJob = ({ jobUuid, onClose }) => {
         });
         setTimeout(() => navigate("/login"), 3000);
       } else if (error.status === 400) {
-        toast.error(error?.data?.message || "Invalid request. Please check your CV and try again.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        toast.error(
+          error?.data?.message ||
+            "Invalid request. Please check your CV and try again.",
+          {
+            position: "top-center",
+            autoClose: 3000,
+          }
+        );
       } else {
-        toast.error(error?.data?.message || "Failed to apply for job. Please try again.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        toast.error(
+          error?.data?.message || "Failed to apply for job. Please try again.",
+          {
+            position: "top-center",
+            autoClose: 3000,
+          }
+        );
       }
     }
   };
@@ -133,7 +163,10 @@ const ApplyJob = ({ jobUuid, onClose }) => {
       <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
         <div className="bg-white rounded-xl shadow-lg w-96 p-8 text-center max-w-full">
           <p className="text-red-600 text-base">
-            Error: {userError?.data?.message || cvError?.data?.message || "Failed to load data."}
+            Error:{" "}
+            {userError?.data?.message ||
+              cvError?.data?.message ||
+              "Failed to load data."}
           </p>
         </div>
       </div>
@@ -143,8 +176,12 @@ const ApplyJob = ({ jobUuid, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-white rounded-xl shadow-lg w-96 p-8 text-center max-w-full">
-        <h2 className="text-xl font-semibold mb-4 text-[#1A5276]">APPLYING JOB</h2>
-        <p className="text-[#1A5276] mb-6 text-base">Do you want to apply this job?</p>
+        <h2 className="text-xl font-semibold mb-4 text-[#1A5276]">
+          APPLYING JOB
+        </h2>
+        <p className="text-[#1A5276] mb-6 text-base">
+          Do you want to apply this job?
+        </p>
 
         <div className="mb-6">
           <label className="block text-base font-medium text-[#1A5276] mb-2">

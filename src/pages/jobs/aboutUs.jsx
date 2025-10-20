@@ -20,7 +20,7 @@ export default function About() {
     }
   };
   return (
-    <section className="mb-20">
+    <section className="mb-20 mt-192 sm:mt-150 xl:mt-150">
       {/* ====== About Section ====== */}
       <section className="absolute top-0 w-full bg-gradient-to-b from-blue-200 via-blue-100 to-white pb-25 pt-25">
         {/* <NavBar className="mb-16 " /> */}

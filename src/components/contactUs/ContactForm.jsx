@@ -61,7 +61,7 @@ const ContactForm = () => {
             value={formData.email}
             onChange={handleChange}
             autoComplete="email"
-            placeholder="jobcollab@gmail.com"
+            placeholder="your email"
             className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-[#1A5276] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5276] focus:border-[#1A5276]"
           />
         </div>
@@ -74,7 +74,7 @@ const ContactForm = () => {
             type="tel"
             value={formData.phoneNumber}
             onChange={handleChange}
-            placeholder="+855 Contact number"
+            placeholder="Contact number"
             className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-[#1A5276] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5276] focus:border-[#1A5276]"
           />
         </div>

@@ -41,7 +41,7 @@ const Dropdown = ({ label, options, onSelect, className }) => {
     <div className={`relative w-full ${className}`} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between p-3 rounded-[10px] bg-white border border-gray-300 w-full text-sm text-[#1A5276] font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1A5276]"
+        className="flex items-center justify-between p-3 rounded-[10px] bg-white border border-gray-300 w-full text-sm sm:text-base text-[#1A5276] font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#1A5276]"
       >
         <span className="truncate">{selected}</span>
         <HiOutlineChevronDown className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
@@ -233,43 +233,35 @@ const FindJobPage = () => {
 
   if (allJobsLoading || paginatedJobsLoading || latestJobsLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-[#1A5276]">Loading jobs...</p>
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+        <p className="text-[#1A5276] text-lg sm:text-xl">Loading jobs...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen font-sans mx-[105px] mt-12">
+    <div className="min-h-screen font-sans px-4 sm:px-6 lg:px-10 xl:px-24 mt-10 bg-[#f5f5f5]">
+      {/* ===== HEADER ===== */}
       <header className="mb-8 md:mb-12 text-center">
-        <h1 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276]">Find your dream jobs</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276]">
+          Find your dream jobs
+        </h1>
       </header>
-      <section className="flex flex-col items-center gap-4 mb-10 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
-          <div className="flex flex-col">
-            <label className="text-[#1A5276] font-medium text-lg mb-2">Categories</label>
-            <Dropdown label="All Categories" options={categories} onSelect={setSelectedCategory} />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-[#1A5276] font-medium text-lg mb-2">Experiences</label>
-            <Dropdown label="All Experiences" options={experiences} onSelect={setSelectedExperience} />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-[#1A5276] font-medium text-lg mb-2">Locations</label>
-            <Dropdown label="All Locations" options={locations} onSelect={setSelectedLocation} />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-[#1A5276] font-medium text-lg mb-2">Project Price</label>
-            <Dropdown label="All Prices" options={salaries} onSelect={setSelectedSalary} />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-[#1A5276] font-medium text-lg mb-2">Working Hour</label>
-            <Dropdown label="All Working Hours" options={workingTimes} onSelect={setSelectedWorkingTime} />
-          </div>
+
+      {/* ===== FILTER SECTION ===== */}
+      <section className="flex flex-col items-center gap-6 mb-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 w-full">
+          <Dropdown label="All Categories" options={categories} onSelect={setSelectedCategory} />
+          <Dropdown label="All Experiences" options={experiences} onSelect={setSelectedExperience} />
+          <Dropdown label="All Locations" options={locations} onSelect={setSelectedLocation} />
+          <Dropdown label="All Prices" options={salaries} onSelect={setSelectedSalary} />
+          <Dropdown label="All Working Hours" options={workingTimes} onSelect={setSelectedWorkingTime} />
         </div>
       </section>
+
+      {/* ===== JOB LIST ===== */}
       <section className="max-w-7xl mx-auto mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer px-4">
           {displayedJobs.length > 0 ? (
             displayedJobs.map((job) => (
               <SingleJobCard
@@ -284,19 +276,23 @@ const FindJobPage = () => {
               />
             ))
           ) : (
-            <p className="text-center text-[#1A5276] col-span-full text-xl py-10">
+            <p className="text-center text-[#1A5276] col-span-full text-lg sm:text-xl py-10">
               No jobs found matching your current filter criteria.
             </p>
           )}
         </div>
       </section>
+
+      {/* ===== PAGINATION ===== */}
       {displayTotalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2 mt-8 mb-12">
+        <div className="flex items-center justify-center flex-wrap gap-2 mt-8 mb-12">
           <button
             onClick={() => handlePageChange(displayCurrentPage - 1)}
             disabled={displayCurrentPage === 0}
-            className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
-              displayCurrentPage === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
+            className={`px-3 sm:px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
+              displayCurrentPage === 0
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-[#1A5276] hover:bg-gray-200'
             }`}
           >
             Previous
@@ -305,7 +301,7 @@ const FindJobPage = () => {
             <button
               key={index}
               onClick={() => typeof page === 'number' && handlePageChange(page)}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
+              className={`px-3 sm:px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
                 page === '...' ? 'text-[#1A5276] cursor-default' : displayCurrentPage === page ? 'bg-[#1A5276] text-white' : 'text-[#1A5276] hover:bg-gray-200'
               }`}
             >
@@ -315,17 +311,23 @@ const FindJobPage = () => {
           <button
             onClick={() => handlePageChange(displayCurrentPage + 1)}
             disabled={displayCurrentPage === displayTotalPages - 1}
-            className={`px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
-              displayCurrentPage === displayTotalPages - 1 ? 'text-gray-400 cursor-not-allowed' : 'text-[#1A5276] hover:bg-gray-200'
+            className={`px-3 sm:px-4 py-2 rounded-full font-semibold transition-colors duration-200 ${
+              displayCurrentPage === displayTotalPages - 1
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-[#1A5276] hover:bg-gray-200'
             }`}
           >
             Next
           </button>
         </div>
       )}
+
+      {/* ===== LATEST JOBS ===== */}
       <section className="max-w-7xl mx-auto mb-12">
-        <h2 className="text-3xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276] text-center mb-8">Latest Jobs</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer">
+        <h2 className="text-2xl sm:text-3xl md:text-[32px] font-semibold text-[#1A5276] text-center mb-8">
+          Latest Jobs
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 cursor-pointer px-4">
           {latestJobs.length > 0 ? (
             latestJobs.map((job) => (
               <SingleJobCard
@@ -340,10 +342,14 @@ const FindJobPage = () => {
               />
             ))
           ) : (
-            <p className="text-center text-[#1A5276] col-span-full">No latest jobs found.</p>
+            <p className="text-center text-[#1A5276] col-span-full text-lg sm:text-xl">
+              No latest jobs found.
+            </p>
           )}
         </div>
       </section>
+
+      {/* ===== APPLY JOB MODAL ===== */}
       {isApplyModalOpen && (
         <ApplyJob jobUuid={selectedJobUuid} onClose={handleCloseModal} />
       )}

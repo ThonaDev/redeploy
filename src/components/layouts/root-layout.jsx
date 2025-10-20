@@ -5,6 +5,7 @@ import Nav from "./navbar-beforeLogin";
 import NavBar from "./navbar-afterLogin";
 import { useSelector } from "react-redux";
 import { useGetUserQuery } from "../../features/api/apiSlice";
+import { ToastContainer } from "react-toastify";
 
 export default function RootLayout() {
   const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
@@ -13,7 +14,13 @@ export default function RootLayout() {
   });
 
   // Debug logging
-  console.log("RootLayout state:", { isAuthenticated, accessToken, isLoading, isError, isSuccess });
+  console.log("RootLayout state:", {
+    isAuthenticated,
+    accessToken,
+    isLoading,
+    isError,
+    isSuccess,
+  });
 
   // Render NavBar if authenticated and user fetch is successful, otherwise Nav
   const isLoggedIn = isAuthenticated && accessToken && isSuccess && !isError;

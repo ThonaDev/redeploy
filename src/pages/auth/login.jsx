@@ -96,14 +96,11 @@ export default function Login() {
       const { email } = result.user;
 
       // Attempt to log in with the email (assuming the user already exists)
-      // You may need a backend endpoint to map social login to existing accounts
       toast.info("Attempting to log in with social account...", {
         position: "top-center",
         autoClose: 3000,
       });
 
-      // Note: This assumes your backend has an endpoint to handle social login
-      // Replace with actual login logic for social accounts
       const loginPayload = { email, socialProvider: providerType };
       const loginResponse = await login(loginPayload).unwrap();
 
@@ -181,9 +178,9 @@ export default function Login() {
               </label>
               <input
                 type="email"
-                placeholder="phartphea854@gmail.com"
                 {...register("email")}
                 className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                placeholder="Enter email address"
               />
               {errors.email && (
                 <p className="text-red-600 text-sm mt-1">
@@ -198,9 +195,9 @@ export default function Login() {
               </label>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
                 {...register("password")}
                 className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
+                placeholder="Enter your password"
               />
               <button
                 type="button"
@@ -229,29 +226,36 @@ export default function Login() {
             <button
               type="submit"
               disabled={isSubmitting || isSocialLoading}
-              className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50"
+              className="w-40 bg-[#154360] text-white py-2 rounded-full mt-6 hover:bg-[#149AC5] transition disabled:opacity-50 sm:w-11/12 text-center font-semibold"
             >
               {isSubmitting ? "Logging In..." : "Login"}
             </button>
           </form>
 
-          <div className="mt-6 text-center w-full">
-            <p className="text-lg mb-3 text-[#1A5276]">Or login with</p>
-            <div className="flex justify-center space-x-5 text-3xl">
-              <FaGithub
-                size={42}
+          <div className="mt-3 text-center w-full">
+            <p className="text-lg mb-3 text-[#1A5276]">Or</p>
+            <div className="flex justify-center space-x-6">
+              <button
                 onClick={() => !isSocialLoading && handleSocialLogin("github")}
-                className={`cursor-pointer text-black hover:scale-110 transition ${
+                disabled={isSocialLoading}
+                className={`flex items-center justify-center space-x-3 py-2 px-2 border border-[#1A5276] rounded-lg text-sm font-medium text-[#1A5276] bg-white hover:bg-gray-50 transition ${
                   isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
                 }`}
-              />
-              <FcGoogle
-                size={48}
+              >
+                <FaGithub size={24} className="text-black" />
+                <span>Login with GitHub</span>
+              </button>
+
+              <button
                 onClick={() => !isSocialLoading && handleSocialLogin("google")}
-                className={`cursor-pointer hover:scale-110 transition ${
+                disabled={isSocialLoading}
+                className={`flex items-center justify-center space-x-3 py-2 px-2 border border-[#1A5276] rounded-lg text-sm font-medium text-[#1A5276] bg-white hover:bg-gray-50 transition ${
                   isSocialLoading ? "opacity-60 cursor-not-allowed" : ""
                 }`}
-              />
+              >
+                <FcGoogle size={24} />
+                <span>Login with Google</span>
+              </button>
             </div>
           </div>
 

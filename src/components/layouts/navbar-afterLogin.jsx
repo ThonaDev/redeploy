@@ -18,6 +18,7 @@ import { clearTokens } from "../../utils/tokenUtils";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase/firebase-config";
 import { toast } from "react-toastify";
+import logo from "../../assets/jobCollapLogo.png"; // Import the logo
 
 const NavBar = () => {
   const [open, setOpen] = useState(false);
@@ -155,7 +156,7 @@ const NavBar = () => {
       <div className="flex items-center">
         <NavLink to="/">
           <img
-            src="src/assets/jobCollapLogo.png"
+            src={logo} // Use imported logo
             alt="JOBCOLLAP Logo"
             className="h-10 md:h-12 mr-4 object-contain"
           />

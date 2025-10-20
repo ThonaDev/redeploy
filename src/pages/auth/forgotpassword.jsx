@@ -118,7 +118,7 @@ export default function ForgotPassword() {
               </label>
               <input
                 type="email"
-                placeholder="jobcollab123@gmail.com"
+                placeholder="Enter email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-2 border border-[#1A5276] rounded-lg mt-1 bg-white focus:ring-2 focus:ring-[#149AC5] outline-none"
