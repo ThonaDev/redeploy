@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
 import { FiMapPin } from "react-icons/fi";
 import { NavLink } from "react-router-dom";
+import { useGetUserQuery } from "../../../features/api/apiSlice";
+import { ToastContainer, toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const SingleJobCard = ({
   jobTitle,
@@ -25,6 +29,14 @@ const SingleJobCard = ({
       `Job ${jobTitle} (UUID: ${jobUuid}) bookmark status toggled to: ${!isBookmarked}`
     );
   };
+
+  const { isAuthenticated, accessToken } = useSelector((state) => state.auth);
+  const { isLoading, isError, isSuccess } = useGetUserQuery(undefined, {
+    skip: !accessToken || !isAuthenticated,
+  });
+
+  const isLoggedIn = isAuthenticated && accessToken && isSuccess && !isError;
+  const navigate = useNavigate();
 
   return (
     <NavLink
@@ -70,13 +82,26 @@ const SingleJobCard = ({
             {salary}$
           </span>
           <NavLink
-            to="/apply"
+            to={isLoggedIn ? "/apply" : "/login"}
+            onClick={(e) => {
+              if (!isLoggedIn) {
+                e.preventDefault(); // stop navigation
+                toast.error("Please login to apply for a job!", {
+                  position: "top-center",
+                  autoClose: 3000,
+                  onClose: () => {
+                    navigate("/login");
+                  },
+                });
+              }
+            }}
             className="bg-[#1A5276] text-white border border-[#1A5276] px-4 py-2 rounded-[50px] hover:bg-white hover:text-[#1A5276] transition-colors duration-200 text-sm cursor-pointer"
           >
             Apply
           </NavLink>
         </div>
       </div>
+      <ToastContainer />
     </NavLink>
   );
 };

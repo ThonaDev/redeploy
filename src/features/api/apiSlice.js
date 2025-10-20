@@ -29,9 +29,15 @@ const baseQueryCustom = fetchBaseQuery({
         headers.set("Authorization", `Bearer ${accessToken}`);
       }
     }
+    if (endpoint === "uploadMedia") {
+      headers.set("content-type", "multipart/form-data");
+    } else {
+      headers.set("content-type", "application/json");
+    }
     console.log(
       `Preparing headers for endpoint: ${endpoint}`,
-      headers.get("Authorization")
+      headers.get("Authorization"),
+      headers.get("content-type")
     );
     return headers;
   },
@@ -157,12 +163,24 @@ export const apiSlice = createApi({
       providesTags: ["Skills"],
     }),
     updateUser: build.mutation({
-      query: ({ userId, formData }) => ({
+      query: ({ userId, body }) => ({
         url: `/users/update/${userId}`,
-        method: "PATCH",
-        body: formData,
+        method: "PUT",
+        body,
       }),
       invalidatesTags: ["User"],
+    }),
+    uploadMedia: build.mutation({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return {
+          url: "/medias/upload",
+          method: "POST",
+          body: formData,
+        };
+      },
+      transformResponse: (response) => response.data[0], // Return first file's data
     }),
   }),
 });
@@ -176,4 +194,5 @@ export const {
   useGetPositionsQuery,
   useGetSkillsQuery,
   useUpdateUserMutation,
+  useUploadMediaMutation,
 } = apiSlice;

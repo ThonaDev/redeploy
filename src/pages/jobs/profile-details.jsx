@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation } from "../../features/api/apiSlice";
+import { useGetUserQuery, useGetPositionsQuery, useGetSkillsQuery, useUpdateUserMutation, useUploadMediaMutation } from "../../features/api/apiSlice";
 
 // --- Validation Schema ---
 const profileSchema = z.object({
@@ -146,6 +146,7 @@ const ProfileDetail = () => {
   const { data: positionsData, isLoading: positionsLoading, error: positionsError } = useGetPositionsQuery();
   const { data: skillsData, isLoading: skillsLoading, error: skillsError } = useGetSkillsQuery();
   const [updateUser, { isLoading: isUpdating, error: updateError }] = useUpdateUserMutation();
+  const [uploadMedia, { isLoading: isUploadingMedia, error: uploadError }] = useUploadMediaMutation();
 
   const { control, register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: zodResolver(profileSchema),
@@ -219,36 +220,50 @@ const ProfileDetail = () => {
         toast.error("User ID not found. Please log in again.");
         return;
       }
-      const formData = new FormData();
-      formData.append("name", data.fullName);
-      formData.append("gender", data.gender.toUpperCase());
+
+      let profileUrl = userData?.profile || "";
       if (fileInputRef.current?.files[0]) {
-        formData.append("profile", fileInputRef.current.files[0]);
-      } else {
-        formData.append("profile", userData?.profile || "");
+        const file = fileInputRef.current.files[0];
+        console.log("Uploading file:", file.name);
+        const uploadResult = await uploadMedia(file).unwrap();
+        console.log("Upload successful:", uploadResult);
+        profileUrl = uploadResult.previewLink;
+        toast.success("Profile photo uploaded successfully!");
       }
-      formData.append("coverPhoto", userData?.coverPhoto || "");
-      formData.append("phoneNumber", data.contact);
-      formData.append("bio", data.bio);
-      formData.append("isOtpAuthentication", JSON.stringify(false));
-      formData.append("expectedSalary", JSON.stringify(0));
 
-      // Map jobTitle to position UUID
       const positionUuid = positionsData?.find((pos) => pos.title === data.jobTitle)?.uuid || "";
-      formData.append("positions", JSON.stringify(positionUuid ? [positionUuid] : []));
-
-      // Map skills to skill UUIDs
       const skillUuids = data.skills
         .map((skillName) => skillsData?.find((skill) => skill.skillName === skillName)?.uuid)
         .filter(Boolean);
-      formData.append("skillUuids", JSON.stringify(skillUuids));
 
-      const result = await updateUser({ userId, formData }).unwrap();
-      console.log("Update successful:", result);
+      const jsonBody = {
+        name: data.fullName,
+        gender: data.gender.toUpperCase(),
+        profile: profileUrl,
+        coverPhoto: userData?.coverPhoto || "",
+        phoneNumber: data.contact,
+        bio: data.bio,
+        isOtpAuthentication: false,
+        expectedSalary: 0,
+        positions: positionUuid ? [positionUuid] : [],
+        skillUuids,
+      };
+
+      console.log("Submitting JSON:", jsonBody);
+      const updateResult = await updateUser({ userId, body: jsonBody }).unwrap();
+      console.log("Update successful:", updateResult);
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("Update failed:", error);
-      toast.error("Failed to update profile. Please try again.");
+      console.error("Error:", error, "Status:", error.status, "Data:", error.data);
+      if (error.status === 401) {
+        toast.error("Unauthorized. Please log in again.");
+      } else if (error.status === 403) {
+        toast.error("Permission denied. Check your account permissions or contact support.");
+      } else if (error.status === 400) {
+        toast.error("Invalid request: " + (error.data?.message || "Please check your input and try again."));
+      } else {
+        toast.error("Failed to update profile: " + (error.data?.message || "Please try again."));
+      }
     }
   };
 
@@ -279,9 +294,10 @@ const ProfileDetail = () => {
   }
 
   if (userError || positionsError || skillsError) {
+    console.log("Errors:", { userError, positionsError, skillsError });
     return (
       <div className="text-center p-8 text-red-500">
-        Error loading data. Please try again.
+        Error loading data: {userError?.data?.message || positionsError?.data?.message || skillsError?.data?.message || "Please try again."}
       </div>
     );
   }
@@ -469,12 +485,12 @@ const ProfileDetail = () => {
         <div className="pt-6">
           <button
             type="submit"
-            disabled={isUpdating}
+            disabled={isUpdating || isUploadingMedia}
             className={`w-full py-2 bg-[#1A5276] text-white font-semibold text-lg rounded-lg shadow-md hover:bg-[#149AC5] focus:outline-none focus:ring-4 focus:ring-[#149AC5] transition duration-150 ease-in-out ${
-              isUpdating ? "opacity-50 cursor-not-allowed" : ""
+              isUpdating || isUploadingMedia ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isUpdating ? "Saving..." : "Save changes"}
+            {isUpdating || isUploadingMedia ? "Saving..." : "Save changes"}
           </button>
         </div>
       </form>
