@@ -29,9 +29,8 @@ const baseQueryCustom = fetchBaseQuery({
         headers.set("Authorization", `Bearer ${accessToken}`);
       }
     }
-    if (endpoint === "uploadMedia") {
-      headers.set("content-type", "multipart/form-data");
-    } else {
+    // Do NOT set Content-Type for uploadMedia; let the browser handle multipart/form-data with boundary
+    if (endpoint !== "uploadMedia") {
       headers.set("content-type", "application/json");
     }
     console.log(
@@ -97,7 +96,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User", "Positions", "Skills"],
+  tagTypes: ["User", "Positions", "Skills", "CV"],
   endpoints: (build) => ({
     login: build.mutation({
       query: (body) => ({
@@ -173,7 +172,7 @@ export const apiSlice = createApi({
     uploadMedia: build.mutation({
       query: (file) => {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("files", file);
         return {
           url: "/medias/upload",
           method: "POST",
@@ -181,6 +180,14 @@ export const apiSlice = createApi({
         };
       },
       transformResponse: (response) => response.data[0], // Return first file's data
+    }),
+    createCV: build.mutation({
+      query: (body) => ({
+        url: "/cvs",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["CV"],
     }),
   }),
 });
@@ -195,4 +202,5 @@ export const {
   useGetSkillsQuery,
   useUpdateUserMutation,
   useUploadMediaMutation,
+  useCreateCVMutation,
 } = apiSlice;
