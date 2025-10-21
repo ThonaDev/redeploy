@@ -216,13 +216,13 @@ const NavBar = () => {
           )}
         </div>
         <div className="flex items-center space-x-4 text-[#1A5276]" ref={profileRef}>
-          <button
+          {/* <button
             aria-label="Toggle dark mode"
             className="p-2 hover:bg-gray-100 rounded-full hover:text-[#FF7A00] transition-colors"
             onClick={toggleDarkMode}
           >
             {darkMode ? <FiSun size={24} /> : <FiMoon size={24} />}
-          </button>
+          </button> */}
 
           <div className="relative">
             <button
