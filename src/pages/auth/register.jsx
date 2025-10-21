@@ -109,19 +109,34 @@ export default function Register() {
       console.log("Registration result:", result); // Debug log
       toast.success("Please check your email to verify your registration", {
         position: "top-center",
-        autoClose: 60000,
+        autoClose: 30000,
       });
       reset();
       setTimeout(() => navigate("/login"), 5100); // Delay navigation
     } catch (err) {
       console.error("❌ Registration failed:", err, err?.data, err?.status); // Debug log
-      toast.error(
-        err?.data?.message || "Registration failed! Please try again.",
-        {
-          position: "top-center",
-          autoClose: 5000,
-        }
-      );
+      if (
+        err?.data?.message?.includes("already registered") ||
+        err?.data?.message?.includes("email already exists") ||
+        err?.status === 409
+      ) {
+        toast.error(
+          "This email is already registered. Please use a different email or login.",
+          {
+            position: "top-center",
+            autoClose: 5000,
+          }
+        );
+        setTimeout(() => navigate("/login"), 5100);
+      } else {
+        toast.error(
+          err?.data?.message || "Registration failed! Please try again.",
+          {
+            position: "top-center",
+            autoClose: 5000,
+          }
+        );
+      }
     }
   };
 
@@ -146,7 +161,7 @@ export default function Register() {
         "Account created! Please check your email to verify your registration. Logging in shortly...",
         {
           position: "top-center",
-          autoClose: 60000,
+          autoClose: 30000,
         }
       );
 
@@ -200,14 +215,18 @@ export default function Register() {
           { position: "top-center", autoClose: 5000 }
         );
       } else if (
-        error?.data?.status === 500 ||
-        error?.data?.message?.includes("already registered")
+        error?.data?.message?.includes("already registered") ||
+        error?.data?.message?.includes("email already exists") ||
+        error?.status === 409
       ) {
         toast.error(
-          "This email is already registered. Please use normal login.",
-          { position: "top-center", autoClose: 5000 }
+          "This email is already registered. Please use a different email or login.",
+          {
+            position: "top-center",
+            autoClose: 5000,
+          }
         );
-        navigate("/login");
+        setTimeout(() => navigate("/login"), 5100);
       } else {
         toast.error(`🚨 ${providerType} login failed`, {
           position: "top-center",

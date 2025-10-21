@@ -41,11 +41,11 @@ export default function FreelancerDetail() {
                 <p className="text-sm sm:text-base">{freelancer.role}</p>
               </div>
             </div>
-            <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+            {/* <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
               <button className="bg-[#1A5276] text-white border border-[#1A5276] px-5 py-2 rounded-[10px] hover:bg-white hover:text-[#1A5276] h-[45px] whitespace-nowrap text-sm sm:text-base transition-colors duration-200">
                 Send Mail
               </button>
-            </div>
+            </div> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
