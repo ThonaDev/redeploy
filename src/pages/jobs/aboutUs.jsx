@@ -35,14 +35,21 @@ export default function About() {
               freelancers and businesses <br />
               connect and grow
             </p>
-            <button onClick={scrollToWhoWeAre} className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]">
+            <button
+              onClick={scrollToWhoWeAre}
+              className="px-6 py-3 bg-[#1A5276] text-white rounded-full font-semibold transition hover:bg-blue-50 hover:text-[#1A5276] border border-transparent hover:border-[#1A5276]"
+            >
               Learn More
             </button>
           </div>
 
           {/* Right Side: Image */}
           <div className="flex justify-center">
-            <img src="src/assets/hero.png" alt="About Jobcollap" className="w-full h-auto"/>
+            <img
+              src="https://job-api.sokpheng.com/api/v1/medias/preview/27bc033a-bebf-429d-8c7c-ddddb52cf83a.png"
+              alt="About Jobcollap"
+              className="w-full h-auto"
+            />
           </div>
         </div>
       </section>
@@ -52,7 +59,10 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side: Image */}
           <div className="flex justify-center">
-            <img src="src/assets/Team.jpg" alt="Who We Are" />
+            <img
+              src="https://job-api.sokpheng.com/api/v1/medias/preview/c57c10bd-c963-4a3f-9589-d7d98c98f9dc.jpg"
+              alt="Who We Are"
+            />
           </div>
 
           {/* Right Side: Text */}

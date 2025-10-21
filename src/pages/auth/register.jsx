@@ -109,7 +109,7 @@ export default function Register() {
       console.log("Registration result:", result); // Debug log
       toast.success("Please check your email to verify your registration", {
         position: "top-center",
-        autoClose: 30000,
+        autoClose: 40000,
       });
       reset();
       setTimeout(() => navigate("/login"), 5100); // Delay navigation
@@ -161,7 +161,7 @@ export default function Register() {
         "Account created! Please check your email to verify your registration. Logging in shortly...",
         {
           position: "top-center",
-          autoClose: 30000,
+          autoClose: 40000,
         }
       );
 
