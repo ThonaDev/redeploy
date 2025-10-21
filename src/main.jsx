@@ -18,6 +18,7 @@ import ApplyJob from "./pages/jobs/applying-page";
 import JobDetail from "./pages/jobs/job-details-page";
 import { StrictMode } from "react";
 import FreeLancerDetail from "./components/card/best_freelancer/bestfreelancer-card-details";
+import NotFoundPage from "./pages/auth/pagenotfound";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -39,6 +40,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/apply" element={<ApplyJob />} />
+          <Route path="*" element={<NotFoundPage />} />
 
         </Routes>
       </BrowserRouter>
