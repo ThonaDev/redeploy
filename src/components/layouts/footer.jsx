@@ -20,17 +20,21 @@ const Footer = () => {
           lg:flex lg:flex-row lg:justify-between lg:items-start
         ">
 
-          {/* 1. Organized and Sponsored By */}
-          <div className="flex flex-col items-center text-center">
-            <h4 className="font-bold text-lg mb-4 whitespace-nowrap">Organized and Sponsored By</h4>
-            <div className="w-24 h-24 sm:w-28 sm:h-28">
-              <img src={istadLogo} alt="ISTAD" className="w-full h-full object-contain" />
-            </div>
-          </div>
+{/* 1. Organized and Sponsored By */}
+<div className="flex flex-col items-center text-center space-x-1">
+  <h4 className="font-bold text-lg mb-5.5 whitespace-nowrap">
+    Organized and Sponsored By
+  </h4>
+  <div className="w-32 h-auto sm:w-40">
+    <img src={istadLogo} alt="ISTAD" className="w-40 h-full object-contain" />
+  </div>
+</div>
+
+
 
           {/* 2. Prepared By */}
           <div className="flex flex-col items-center text-center">
-            <h4 className="font-bold text-lg mb-4 whitespace-nowrap">Prepared By</h4>
+            <h4 className="font-bold text-lg mb-8 whitespace-nowrap">Prepared By</h4>
             <div className="w-32 h-auto sm:w-40">
               <img src={jobCollabLogo} alt="JOBCOLLAB" className="w-full h-full object-contain" />
             </div>
