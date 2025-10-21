@@ -147,7 +147,7 @@ const ContactForm = () => {
           <label htmlFor="first-name" className="block text-sm font-semibold text-[#1A5276]">
             Full Name
           </label>
-          <textarea
+          <InputField
             id="first-name"
             name="firstName"
             ref={nameRef}
@@ -159,7 +159,7 @@ const ContactForm = () => {
             className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-[#1A5276] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5276] focus:border-[#1A5276] resize-none overflow-hidden"
             style={{ lineHeight: '1.25rem' }}
             aria-label="First name (can be long)"
-            required
+            // required
           />
         </div>
         <div className="sm:col-span-2">
