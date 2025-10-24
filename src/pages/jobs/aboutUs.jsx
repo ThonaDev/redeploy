@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { AboutCard } from "../../components/card/about_card/Card-About";
-import Sokcheat from "../../assets/Sokcheat.jpg";
+import Sokcheat from "../../assets/Sokcheat.JPG";
 import Chansokpheng from "../../assets/Chansokpheng.jpg";
 import Sunnich from "../../assets/Sunnich.jpg";
 import Sokkeang from "../../assets/Sokkeang.jpg";
