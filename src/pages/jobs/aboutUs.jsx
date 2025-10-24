@@ -1,13 +1,15 @@
 import React, { useRef } from "react";
 import { AboutCard } from "../../components/card/about_card/Card-About";
-import Sokcheat from "../../assets/sokcheat.jpg";
-import Chansokpheng from "../../assets/chansokpheng.jpg";
-import Sunnich from "../../assets/sunnich.jpg";
-import Sokkeang from "../../assets/sokkeang.jpg";
-import PhatPhea from "../../assets/phatphea.jpg";
-import Mengleang from "../../assets/mengleang.jpg";
-import Rothanak from "../../assets/rothanak.jpg";
-import Thona from "../../assets/thona.jpg";
+import Sokcheat from "../../assets/Sokcheat.jpg";
+import Chansokpheng from "../../assets/Chansokpheng.jpg";
+import Sunnich from "../../assets/Sunnich.jpg";
+import Sokkeang from "../../assets/Sokkeang.jpg";
+import PhatPhea from "../../assets/PhatPhea.jpg";
+import Mengleang from "../../assets/Mengleang.jpg";
+import Rothanak from "../../assets/Rothanak.jpg";
+import Thona from "../../assets/Thona.jpg";
+import hero from "../../assets/hero.png"
+import Team from "../../assets/Team.jpg"
 import NavBar from "../../components/layouts/navbar-afterLogin.jsx";
 
 export default function About() {
@@ -46,7 +48,7 @@ export default function About() {
           {/* Right Side: Image */}
           <div className="flex justify-center">
             <img
-              src="https://job-api.sokpheng.com/api/v1/medias/preview/27bc033a-bebf-429d-8c7c-ddddb52cf83a.png"
+              src={hero}
               alt="About Jobcollap"
               className="w-full h-auto"
             />
@@ -60,7 +62,7 @@ export default function About() {
           {/* Left Side: Image */}
           <div className="flex justify-center">
             <img
-              src="https://job-api.sokpheng.com/api/v1/medias/preview/c57c10bd-c963-4a3f-9589-d7d98c98f9dc.jpg"
+              src={Team}
               alt="Who We Are"
             />
           </div>
